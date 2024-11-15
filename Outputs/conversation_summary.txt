@@ -1,0 +1,56 @@
+Recruitment Conversation Summary
+
+What are the main requirements for the role?: java
+
+Work location: hybrid
+
+Days in office per week: 2
+
+Can you briefly explain what your company does?: Building awesome stuff
+
+How big is your organization (number of employees, departments, sister organizations, branches)?: 500 e,üloyees worldwide
+
+How do you differentiate yourself from other employers/competitors? Why do people work for you?: better salary
+
+What does the team look like? (average age, roles, gender ratio, freelancer vs permanent ratio): 12 developers
+
+What technologies are used in the team? What are the team responsibilities?: java docker
+
+How did this job opening come about?: maternity leave
+
+Can you describe the position? (responsibilities, typical workday, projects): build awesome stuff
+
+What are the must-have technical skills (number of years, minimum requirements - create flexibility)?: 5 years of JAVA
+
+What are the desired technical skills?: Docker
+
+What personal skills are needed? What kind of person fits into your team?: communiavtor
+
+Language requirements (create flexibility)?: german and english
+
+Education - certifications, driving license, commuting distance?: java certified
+
+Preferred previous employers or roles?: no
+
+Can you describe your ideal candidate in five words?: should develop awesome stuff regularly
+
+What do you value the most?: 
+
+What is the primary salary range (minimum/maximum)? 13th-month salary, holiday pay?: 1 mio
+
+Bonus structure?: no
+
+Number of vacation days, expense reimbursements?: 50
+
+Company car/reimbursement, travel costs, parking?: no
+
+Laptop/phone, pension plan?: no
+
+Training budget, other benefits?: training budget
+
+What does the interview process look like?: 2 stages
+
+First interview: Who (name/position/role relative to the job opening, focus of the interview, questions)?: with me and HR
+
+Second interview: Who (name/position/role relative to the job opening, focus of the interview, questions)?: with me
+
