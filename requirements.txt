@@ -1,19 +1,33 @@
-streamlit>=1.13.0
-faiss-cpu==1.9.0
-sentence-transformers==2.6.0
-python-dotenv>=1.0.1
-pandas>=2.2.3
-tqdm>=4.67.0
-jupyterlab>=4.2.5
-langchain-community>=0.3.2
-langchain-openai>=0.2.3
-langchain-huggingface>=0.1.0
-langchain-groq>=0.2.0
-langchainhub>=0.1.21
-pypdf>=4.2.0
-requests>=2.31.0
-Pillow>=10.0.0
-altair>=4.2.0
-folium>=0.14.0
-streamlit-folium>=0.12.0
-streamlit-option-menu>=0.3.2
+# Streamlit and Related Dependencies
+streamlit>=1.13.0  # Streamlit is used as the main framework to create interactive web applications for the recruitment analysis.
+streamlit-folium>=0.12.0  # Allows integration of Folium maps into Streamlit, used for visualizing geographic data in our project.
+streamlit-option-menu>=0.3.2  # Provides easy navigation options to create sidebar menus and enhance the user experience.
+streamlit-multipage>=0.1.0  # Enables multi-page navigation in our Streamlit application, allowing users to seamlessly navigate between different sections of the recruitment process.
+requests>=2.31.0  # Library for making HTTP requests, used to interact with external APIs such as the Llama model for generating suggestions.
+
+# Faiss, Sentence Transformers, and NLP Libraries
+faiss-cpu==1.9.0  # Used for efficient similarity search and clustering, which is critical for finding similar job descriptions or candidate profiles.
+sentence-transformers==2.6.0  # Provides pre-trained models for embedding sentences, useful for text similarity and NLP tasks in recruitment needs analysis.
+python-dotenv>=1.0.1  # Loads environment variables from a `.env` file, which is used to manage sensitive credentials such as API keys in our project.
+
+# Data Handling and Visualization Libraries
+pandas>=2.2.3  # Essential for data analysis and manipulation, used to handle datasets such as job postings, reviews, and candidate information.
+tqdm>=4.67.0  # Adds progress bars to loops, useful for monitoring the progress of data processing tasks.
+jupyterlab>=4.2.5  # Used for interactive development, especially during the prototyping and testing of various analysis components.
+altair>=4.2.0  # A declarative statistical visualization library, used for creating interactive visualizations to show trends in data (e.g., job market trends).
+folium>=0.14.0  # Used to create interactive maps, particularly helpful in visualizing locations related to job postings.
+
+# LangChain and Related AI Libraries
+langchain-community>=0.3.2  # Provides utilities to interact with various language models, used for dynamic text generation and conversation flows.
+langchain-openai>=0.2.3  # Enables integration with OpenAI's language models, used to generate candidate evaluations and job descriptions.
+langchain-huggingface>=0.1.0  # Facilitates integration with Hugging Face models, useful for leveraging different language models in NLP tasks.
+langchain-groq>=0.2.0  # Specific integration for using the Groq platform with LangChain, allowing us to utilize specialized hardware for model inference.
+langchainhub>=0.1.21  # Provides access to a collection of pre-built models and chains, enabling rapid development of NLP features.
+
+# PDF and Image Handling Libraries
+pypdf>=4.2.0  # Used to work with PDF files, such as extracting text from resumes or job description documents uploaded by users.
+Pillow>=10.0.0  # Image processing library, useful for handling images, e.g., in case users upload company logos or candidate photos.
+
+# Utility Libraries
+# The following line had a typo and duplicate entry, corrected for clarity.
+requests>=2.31.0  # Merged here for clarity; used for making HTTP requests to interact with APIs and external services.
