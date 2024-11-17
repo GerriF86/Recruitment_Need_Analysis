@@ -2,7 +2,7 @@ import streamlit as st
 
 def about_us():
     st.title("About Us")
-    st.image("images/Screenshot 2024-11-17 132805.png", caption="Our Team at Work")
+    st.image("image1.jpg", caption="Our Team at Work")
     st.markdown("""
     Welcome to our company! We're dedicated to making your experience as seamless and enjoyable as possible.
     Our team works tirelessly behind the scenes to bring you innovative solutions and ensure everything runs smoothly.

@@ -8,7 +8,7 @@ from streamlit_folium import st_folium
 def load_home_page():
     # Add an Image above the Header
     try:
-        image = Image.open('imgs/iceberg.jpg')
+        image = Image.open('images/iceberg-model-of-system-thinking-is-an-illustration-of-a-blue-mountain-and-presentation-this-theory-is-to-analyze-the-root-causes-of-events-hidden-underwater-for-developing-marketing-and-trend-vector.jpg')
         st.image(image, caption="AI-Powered Job Ad Generator", use_column_width=True)
     except FileNotFoundError:
         st.warning("Image not found. Please ensure the file path is correct.")
