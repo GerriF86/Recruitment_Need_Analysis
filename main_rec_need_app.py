@@ -4,7 +4,7 @@ from multiapp import MultiApp
 # Import each page
 from pages.Recruiting_App import recruiting_app
 from pages.Our_Mission import app as our_mission_app
-from pages.About_Us import app as about_us_app
+from pages.about_us import app as about_us_app
 from pages.Impressum import app as impressum_app
 
 # Initialize the app
