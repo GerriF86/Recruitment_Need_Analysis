@@ -1,4 +1,8 @@
+import streamlit as st
+import folium
+from streamlit_folium import st_folium
 
+def recruitment_page():
     # Job Title Input
     st.header("Job Title")
     job_title = st.text_input("Enter the Job Title:")
@@ -6,6 +10,7 @@
     if st.button("Next") and job_title:
         st.session_state['job_title'] = job_title
         load_company_details()
+
 
 def load_company_details():
     st.sidebar.header("Summary of Inputs")
@@ -33,6 +38,7 @@ def load_company_details():
         })
         load_responsibilities()
 
+
 def load_responsibilities():
     st.header("Role-Specific Responsibilities")
     suggested_responsibilities = [
@@ -47,6 +53,7 @@ def load_responsibilities():
     if st.button("Next - Requirements"):
         st.session_state['responsibilities'] = selected_responsibilities + [additional_responsibilities]
         load_requirements()
+
 
 def load_requirements():
     st.header("Role-Specific Requirements")
@@ -63,6 +70,7 @@ def load_requirements():
         st.session_state['requirements'] = selected_requirements + [additional_requirements]
         load_benefits()
 
+
 def load_benefits():
     st.header("Benefits")
     suggested_benefits = [
@@ -77,6 +85,7 @@ def load_benefits():
     if st.button("Generate Job Advertisement"):
         st.session_state['benefits'] = selected_benefits + [additional_benefits]
         generate_job_ad()
+
 
 def generate_job_ad():
     st.header("Generated Job Advertisement")
@@ -99,42 +108,24 @@ def generate_job_ad():
     {', '.join(st.session_state['benefits'])}
     """
     
-    try:
-        response = requests.post(
-            "http://127.0.0.1:11434/api/generate",
-            json={"model": "koesn/dolphin-llama3-8b", "prompt": prompt, "num_ctx": 8192},
-            stream=True
-        )   
-        response.raise_for_status()
+    # Display generated job advertisement
+    st.markdown(prompt)
+    st.download_button(
+        label="Download Job Advertisement",
+        data=prompt,
+        file_name=f"{st.session_state['job_title']}_Job_Ad.txt",
+        mime="text/plain"
+    )
 
-        job_ad = ""
-        for line in response.iter_lines():
-            if line:
-                chunk = line.decode("utf-8")
-                data = json.loads(chunk)
-                job_ad += data.get("response", "")
-                if data.get("done", False):
-                    break
+### Step 4: Enhance the Visual Appeal
 
-        if job_ad.strip():
-            st.subheader("Generated Job Advertisement:")
-            st.markdown(job_ad)
-            st.download_button(
-                label="Download Job Advertisement",
-                data=job_ad,
-                file_name=f"{st.session_state['job_title']}_Job_Ad.txt",
-                mime="text/plain"
-            )
-            st.sidebar.header("Summary of Inputs")
-            st.sidebar.write(f"**Job Title:** {st.session_state['job_title']}")
-            st.sidebar.write(f"**Company:** {st.session_state['company']}")
-            st.sidebar.write(f"**Location:** {st.session_state['place_of_work']}")
-            st.sidebar.write(f"**Start Date:** {st.session_state['start_date']}")
-            st.sidebar.write(f"**Employment Type:** {st.session_state['employment_type']}")
-            st.sidebar.write(f"**Responsibilities:** {', '.join(st.session_state['responsibilities'])}")
-            st.sidebar.write(f"**Requirements:** {', '.join(st.session_state['requirements'])}")
-            st.sidebar.write(f"**Benefits:** {', '.join(st.session_state['benefits'])}")
-        else:
-            st.error("The model did not return any content. Please try again.")
-    except requests.exceptions.RequestException as e:
-        st.error(f"An error occurred: {e}")
+To enhance the visual appeal:
+1. **Icons and Styles**: The `option_menu` component allows you to use icons (from the [Font Awesome](https://fontawesome.com/icons) library). This gives your navigation a polished, professional look.
+2. **Sidebar Styling**: Use the `styles` parameter to add visual elements like colors, paddings, and hover effects. The code above uses these to ensure the menu looks attractive and is easy to use.
+3. **Add Spacing and Section Dividers**: Add some whitespace and use `st.markdown("---")` to create section dividers for a cleaner UI.
+
+### Step 5: Running Your App
+
+Save all files and run your app by executing:
+```bash
+streamlit run main.py

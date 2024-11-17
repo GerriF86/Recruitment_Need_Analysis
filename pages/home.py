@@ -19,8 +19,6 @@ def load_home_page():
     
     # Introduction
     st.markdown("""
-        This app assists HR professionals in creating comprehensive job descriptions 
-        by guiding them through interactive questions. Answer a series of prompts to 
-        generate a formatted job description tailored to your needs.
+        Welcome! This app helps you create job descriptions effortlessly by guiding you step-by-step. Whether you're an HR professional or a hiring manager, 
+        simply answer the questions and watch the app generate a complete, customized job description tailored to your needs.
     """)
-    
