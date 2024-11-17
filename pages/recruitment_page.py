@@ -119,13 +119,13 @@ def generate_job_ad():
 
 ### Step 4: Enhance the Visual Appeal
 
-To enhance the visual appeal:
-1. **Icons and Styles**: The `option_menu` component allows you to use icons (from the [Font Awesome](https://fontawesome.com/icons) library). This gives your navigation a polished, professional look.
-2. **Sidebar Styling**: Use the `styles` parameter to add visual elements like colors, paddings, and hover effects. The code above uses these to ensure the menu looks attractive and is easy to use.
-3. **Add Spacing and Section Dividers**: Add some whitespace and use `st.markdown("---")` to create section dividers for a cleaner UI.
+#To enhance the visual appeal:
+#1. **Icons and Styles**: The `option_menu` component allows you to use icons (from the [Font Awesome](https://fontawesome.com/icons) library). This gives your navigation a polished, professional look.
+#2. **Sidebar Styling**: Use the `styles` parameter to add visual elements like colors, paddings, and hover effects. The code above uses these to ensure the menu looks attractive and is easy to use.
+#3. **Add Spacing and Section Dividers**: Add some whitespace and use `st.markdown("---")` to create section dividers for a cleaner UI.
 
 ### Step 5: Running Your App
 
-Save all files and run your app by executing:
+#Save all files and run your app by executing:
 ```bash
-streamlit run main.py
+#streamlit run main.py
