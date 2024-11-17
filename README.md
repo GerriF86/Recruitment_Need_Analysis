@@ -1,0 +1,1 @@
+An NLP-powered recruitment web app that helps organizations define job requirements with targeted questions. It provides a detailed overview of essential skills, department conditions, and benefits. Ideal for creating job ads or structured interview notes, this app streamlines recruitment with data-driven insights.
