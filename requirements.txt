@@ -14,5 +14,5 @@ pypdf==4.2.0
 requests==2.31.0
 Pillow==10.0.0
 altair==4.2.0
-folium
-streamlit-folium
+folium==0.14.0  
+streamlit-folium==0.12.0  
