@@ -127,5 +127,5 @@ def generate_job_ad():
 ### Step 5: Running Your App
 
 #Save all files and run your app by executing:
-```bash
+#```bash
 #streamlit run main.py
