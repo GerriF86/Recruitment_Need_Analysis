@@ -1,45 +1,20 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
-from pages.blick_unter_motorhaube import blick_unter_die_motorhaube
-from pages.about_us import about_us
-from pages.home_page import load_home_page
-from pages.recruitment_page import recruitment_page
-from pages.impressum_page import load_impressum_page
+from multiapp import MultiApp
 
-# Main function to manage navigation between pages
-def main():
-    # Sidebar menu for navigation
-    with st.sidebar:
-        selected = option_menu(
-            menu_title="Main Menu",  # Required
-            options=["Home", "Blick unter die Motorhaube", "About Us", "Recruitment Need Analysis", "Impressum"],  # Menu options
-            icons=["house", "wrench", "info-circle", "briefcase", "file-alt"],  # Icons for each page
-            menu_icon="cast",  # Icon for the menu
-            default_index=0,  # Default selected page
-            styles={
-                "container": {"padding": "5px", "background-color": "#f0f0f0"},
-                "nav-link": {
-                    "font-size": "16px",
-                    "text-align": "left",
-                    "margin": "5px",
-                    "--hover-color": "#eee"
-                },
-                "icon": {"color": "blue", "font-size": "20px"},
-            },
-        )
-    
-    # Page selection logic
-    if selected == "Blick unter die Motorhaube":
-        blick_unter_die_motorhaube()
-    elif selected == "About Us":
-        about_us()
-    elif selected == "Recruitment Need Analysis":
-        recruitment_page()
-    elif selected == "Impressum":
-        load_impressum_page()
-    else:
-        load_home_page()
+# Import each page
+from pages.Recruiting_App import recruiting_app
+from pages.Our_Mission import app as our_mission_app
+from pages.About_Us import app as about_us_app
+from pages.Impressum import app as impressum_app
 
-# Run the main function
-if __name__ == "__main__":
-    main()
+# Initialize the app
+app = MultiApp()
+
+# Add pages
+app.add_app("Recruiting App", recruiting_app)
+app.add_app("Our Mission", our_mission_app)
+app.add_app("About Us", about_us_app)
+app.add_app("Impressum", impressum_app)
+
+# Run the app
+app.run()
