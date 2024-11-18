@@ -15,7 +15,7 @@ flask-cors>=3.1.0  # For handling CORS issues during development and testing.
 
 # Faiss, Sentence Transformers, and NLP Libraries
 faiss-cpu==1.7.4  # Latest stable version for efficient similarity search.
-sentence-transformers==2.2.2  # Pre-trained models for embedding sentences.
+sentence-transformers==2.6.0  # Pre-trained models for embedding sentences.
 python-dotenv>=1.0.1  # Manage environment variables for sensitive credentials.
 
 # Data Handling and Visualization Libraries
@@ -28,7 +28,7 @@ folium>=0.14.0  # Interactive maps for job-related data visualization.
 # LangChain and Related AI Libraries
 langchain-community>=0.3.5  # Language model interaction utilities.
 langchain-openai>=0.2.5  # OpenAI model integration.
-langchain-huggingface>=0.1.1  # Hugging Face model integration.
+langchain-huggingface>=0.1.2  # Hugging Face model integration.
 langchain-groq>=0.2.1  # Integration for specialized hardware.
 langchainhub>=0.1.21  # Access to pre-built models and NLP chains.
 
