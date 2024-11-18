@@ -8,12 +8,12 @@ import json
 
 def validate_job_title(job_title: str) -> bool:
     """Validate the job title to ensure it follows an appropriate format."""
-    return bool(re.match("^[A-Za-z0-9 ]+$", job_title))
+    return bool(re.match(r"^[A-Za-z0-9 ]+$", job_title))
 
 
 def format_response(response: dict) -> str:
     """Format the response dictionary into a presentable HTML format."""
-    formatted_response = f"""
+    return f"""
     <div>
         <h3>Job Title: {response.get('job_title', 'N/A')}</h3>
         <p>Responsibilities: {', '.join(response.get('responsibilities', []))}</p>
@@ -21,14 +21,11 @@ def format_response(response: dict) -> str:
         <p>Benefits Offered: {', '.join(response.get('benefits', []))}</p>
     </div>
     """
-    return formatted_response
 
 
 def extract_keywords_from_text(text: str) -> List[str]:
     """Placeholder for NLP-based keyword extraction from a given text input."""
-    # Replace with actual NLP-based keyword extraction logic.
-    keywords = ["Leadership", "Team Management", "Critical Thinking"]  # Example output
-    return keywords
+    return ["Leadership", "Team Management", "Critical Thinking"]  # Example
 
 
 def load_html_template(template_name: str) -> Optional[str]:
@@ -37,37 +34,30 @@ def load_html_template(template_name: str) -> Optional[str]:
         with open(os.path.join("templates", template_name), "r") as html_file:
             return html_file.read()
     except FileNotFoundError:
-        st.error(f"{template_name} template not found. Please ensure the file is located in the 'templates' directory.")
+        st.error(f"Template '{template_name}' not found. Please ensure it exists in the 'templates' directory.")
         return None
 
 
-# Utility to query local LLM
 def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx: int = 8192) -> str:
     """
-    Sends a query to the local LLM server and returns the response.
+    Query a local LLM server to generate a response based on a prompt.
 
     Args:
-        prompt (str): The input prompt for the LLM.
-        model (str): The model to use (default: "koesn/dolphin-llama3-8b").
-        num_ctx (int): The context length for the model (default: 8192).
+        prompt (str): Input prompt for the LLM.
+        model (str): Model name to use for generation.
+        num_ctx (int): Context length for the model.
 
     Returns:
-        str: The generated response from the LLM.
+        str: Generated response from the LLM.
     """
     url = "http://127.0.0.1:11434/api/generate"
     headers = {"Content-Type": "application/json"}
-    payload = {
-        "model": model,
-        "prompt": prompt,
-        "num_ctx": num_ctx
-    }
+    payload = {"model": model, "prompt": prompt, "num_ctx": num_ctx}
 
     try:
-        # Stream request for incremental output
         response = requests.post(url, headers=headers, json=payload, stream=True)
         response.raise_for_status()
 
-        # Accumulate the generated text
         generated_text = ""
         for line in response.iter_lines():
             if line:
@@ -76,73 +66,99 @@ def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx
                 if data.get("done", False):
                     break
         return generated_text.strip()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error connecting to LLM: {e}")
-        return f"Error connecting to LLM: {e}"
+    except requests.RequestException as e:
+        st.error(f"Error connecting to the LLM server: {e}")
+        return ""
     except json.JSONDecodeError as e:
-        st.error(f"Error decoding JSON response: {e}")
-        return f"Error decoding JSON response: {e}"
+        st.error(f"Error decoding LLM response: {e}")
+        return ""
 
 
-# Function to generate role-specific skills
 def generate_role_skills(role: str) -> List[str]:
     """
-    Generates a list of 10 skills specific to a role using the local LLM.
+    Generate a list of key skills for a specific role using the local LLM.
 
     Args:
         role (str): The job role to generate skills for.
 
     Returns:
-        List[str]: A list of role-specific skills.
+        List[str]: A list of skills or an empty list if generation fails.
     """
-    prompt = f"List 10 key skills for the role: {role}."
+    if not role:
+        st.warning("Role is empty. Please provide a valid job role.")
+        return []
+
+    prompt = f"List 10 essential skills required for the role: {role}."
     skills_response = query_local_llm(prompt)
-    return skills_response.split("\n") if skills_response else []
+
+    if not skills_response:
+        st.error("Failed to generate skills. Ensure the LLM server is running.")
+        return []
+
+    skills = [skill.strip() for skill in skills_response.split("\n") if skill.strip()]
+    return skills or ["No skills found. Please try a different role."]
 
 
-# Function to generate section summaries
 def generate_section_summary(section: str, details: str) -> str:
     """
-    Generates a summary for a given section using the local LLM.
+    Generate a summary for a specific section using the local LLM.
 
     Args:
-        section (str): The section to summarize (e.g., "Company Info").
-        details (str): The details to summarize.
+        section (str): The name of the section to summarize.
+        details (str): Details to include in the summary.
 
     Returns:
-        str: A summarized version of the section details.
+        str: A summary of the section or an error message if generation fails.
     """
-    prompt = f"Summarize the following {section} information:\n{details}"
-    return query_local_llm(prompt)
+    if not details:
+        return f"No details provided for {section}."
+
+    prompt = f"Summarize the following {section} details:\n{details}"
+    summary = query_local_llm(prompt)
+
+    if not summary:
+        st.error(f"Failed to generate a summary for {section}.")
+        return f"Unable to summarize {section}. Please review the details."
+
+    return summary
 
 
-# Function to create a job advertisement
 def generate_job_advertisement(company_info: str, role_info: str, benefits: str, recruitment_process: str) -> str:
     """
-    Creates a job advertisement based on the given inputs.
+    Generate a professional job advertisement using provided inputs.
 
     Args:
-        company_info (str): Information about the company.
-        role_info (str): Information about the job role.
+        company_info (str): Summary of the company information.
+        role_info (str): Summary of the role information.
         benefits (str): List of benefits offered.
         recruitment_process (str): Description of the recruitment process.
 
     Returns:
-        str: A generated job advertisement.
+        str: A job advertisement or an error message if generation fails.
     """
-    prompt = f"""
-    Create a professional job advertisement using the following details:
+    if not any([company_info, role_info, benefits, recruitment_process]):
+        return "Insufficient data to generate a job advertisement."
 
-    **Company Information:**
+    prompt = f"""
+    Write a professional job advertisement with the following details:
+
+    Company Information:
     {company_info}
 
-    **Role Information:**
+    Role Information:
     {role_info}
 
-    **Benefits:**
+    Benefits:
     {benefits}
 
-    **Recruitment Process:**
+    Recruitment Process:
     {recruitment_process}
     """
-    return query_local_llm(prompt)
+
+    job_ad = query_local_llm(prompt)
+
+    if not job_ad:
+        st.error("Failed to generate the job advertisement. Please check your inputs.")
+        return "Job advertisement generation failed. Please try again."
+
+    return job_ad

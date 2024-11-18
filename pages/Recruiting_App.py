@@ -1,4 +1,5 @@
 import streamlit as st
+from functools import lru_cache
 from helpers.utils import (
     generate_role_skills,
     generate_section_summary,
@@ -12,10 +13,13 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+def recruiting_app_content():
+    return "This is the content of the recruiting app."
 
-# Initialize Session State for Navigation
-if "page" not in st.session_state:
-    st.session_state.page = 1
+# Initialize Session State
+for key in ["page", "company_info", "role_info", "benefits", "recruitment_process"]:
+    if key not in st.session_state:
+        st.session_state[key] = 1 if key == "page" else None
 
 # Navigation Functions
 def next_page():
@@ -40,6 +44,12 @@ def render_header():
     st.markdown("---")
 
 
+# Caching Skill Generation for Performance
+@lru_cache(maxsize=128)
+def cached_generate_role_skills(role):
+    return generate_role_skills(role)
+
+
 # Page 1: Company Information
 def company_info_page():
     render_header()
@@ -50,21 +60,17 @@ def company_info_page():
     work_model = st.selectbox("Work Model:", ["Onsite", "Remote", "Hybrid"])
 
     # Additional input for hybrid work model
-    hybrid_ratio = None
-    if work_model == "Hybrid":
-        hybrid_ratio = st.slider("Percentage Onsite/Remote:", 0, 100, (50, 50))
+    hybrid_ratio = st.slider("Percentage Onsite/Remote:", 0, 100, (50, 50)) if work_model == "Hybrid" else None
 
     industry = st.text_input("Industry:")
-    company_size = st.number_input(
-        "Company Size (Number of Employees):", min_value=1, step=1
-    )
+    company_size = st.number_input("Company Size (Number of Employees):", min_value=1, step=1)
 
-    if st.button("Next"):
+    if st.button("Next") and company_name and location and industry:
         st.session_state.company_info = {
             "name": company_name,
             "location": location,
             "work_model": work_model,
-            "hybrid_ratio": hybrid_ratio if work_model == "Hybrid" else None,
+            "hybrid_ratio": hybrid_ratio,
             "industry": industry,
             "company_size": company_size,
         }
@@ -77,14 +83,13 @@ def role_info_page():
     st.header("Role Information")
 
     role = st.text_input("Role Title:")
-    must_have_skills = st.multiselect(
-        "Must-Have Skills:", generate_role_skills(role)
-    )
-    nice_to_have_skills = st.multiselect(
-        "Nice-to-Have Skills:", generate_role_skills(role)
-    )
+    if role:
+        must_have_skills = st.multiselect("Must-Have Skills:", cached_generate_role_skills(role))
+        nice_to_have_skills = st.multiselect("Nice-to-Have Skills:", cached_generate_role_skills(role))
+    else:
+        st.warning("Enter a role to generate skills.")
 
-    if st.button("Next"):
+    if st.button("Next") and role:
         st.session_state.role_info = {
             "role": role,
             "must_have_skills": must_have_skills,
@@ -103,7 +108,7 @@ def benefits_page():
 
     benefits = st.text_area("List the benefits offered to employees:")
 
-    if st.button("Next"):
+    if st.button("Next") and benefits:
         st.session_state.benefits = benefits
         next_page()
 
@@ -118,7 +123,7 @@ def recruitment_process_page():
 
     recruitment_process = st.text_area("Describe the recruitment process:")
 
-    if st.button("Next"):
+    if st.button("Next") and recruitment_process:
         st.session_state.recruitment_process = recruitment_process
         next_page()
 
@@ -132,21 +137,11 @@ def job_ad_page():
     st.header("Generated Job Advertisement")
 
     # Generate summaries and job ad
-    company_summary = generate_section_summary(
-        "Company Information", st.session_state.get("company_info", {})
-    )
-    role_summary = generate_section_summary(
-        "Role Information", st.session_state.get("role_info", {})
-    )
-    benefits_summary = generate_section_summary(
-        "Benefits", st.session_state.get("benefits", "")
-    )
-    recruitment_summary = generate_section_summary(
-        "Recruitment Process", st.session_state.get("recruitment_process", "")
-    )
-    job_ad = generate_job_advertisement(
-        company_summary, role_summary, benefits_summary, recruitment_summary
-    )
+    company_summary = generate_section_summary("Company Information", st.session_state.get("company_info", {}))
+    role_summary = generate_section_summary("Role Information", st.session_state.get("role_info", {}))
+    benefits_summary = generate_section_summary("Benefits", st.session_state.get("benefits", ""))
+    recruitment_summary = generate_section_summary("Recruitment Process", st.session_state.get("recruitment_process", ""))
+    job_ad = generate_job_advertisement(company_summary, role_summary, benefits_summary, recruitment_summary)
 
     # Display the job ad
     st.subheader("Job Advertisement")
@@ -174,8 +169,8 @@ def main():
         5: job_ad_page,
     }
 
-    # Render the current page
-    page_mapping.get(st.session_state.page, company_info_page)()
+    current_page = page_mapping.get(st.session_state.page, company_info_page)
+    current_page()
 
 
 if __name__ == "__main__":
