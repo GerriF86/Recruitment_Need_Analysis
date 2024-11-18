@@ -1,19 +1,16 @@
 # Summary.py
-from flask import Blueprint, render_template_string, request, redirect, url_for
+import os
+from flask import Blueprint, render_template_string
 
 summary_bp = Blueprint('summary', __name__)
 
-@summary_bp.route('/summary', methods=['GET', 'POST'])
+@summary_bp.route('/summary')
 def summary():
-    # Placeholder content to summarize collected information
+    # Placeholder content to summarize collected information from job description, skills, and benefits
     role = "Software Engineer"
     skills = ["Python", "Machine Learning", "APIs"]
     responsibilities = ["Manage team operations", "Ensure project deadlines are met", "Collaborate with stakeholders"]
     benefits = ["Flexible Work Hours", "Competitive Salary", "Health Insurance"]
-
-    if request.method == 'POST':
-        # Redirect to generate the job ad using collected data
-        return redirect(url_for('job_ad_generator.generate_job_ad'))
 
     return render_template_string('''
     <div class="summary-content">
@@ -36,8 +33,5 @@ def summary():
                 <li>{{ benefit }}</li>
             {% endfor %}
         </ul>
-        <form method="post">
-            <button type="submit">Generate Job Ad</button>
-        </form>
     </div>
     ''', role=role, skills=skills, responsibilities=responsibilities, benefits=benefits)
