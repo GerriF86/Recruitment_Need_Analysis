@@ -1,10 +1,13 @@
-# Home.py
-from flask import Flask
-
-app = Flask(__name__)
-
-def render_home_page():
-    return '''
+<!-- home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <title>Recruitment Need Analysis - Home</title>
+</head>
+<body>
     <div class="home-content">
         <h1>Welcome to the Recruitment Need Analysis Web App</h1>
         <p>Discover the innovation that transforms recruitment processes.</p>
@@ -13,11 +16,6 @@ def render_home_page():
             <button type="submit">Start Need Analysis</button>
         </form>
     </div>
-    '''
-
-@app.route('/')
-def home():
-    return render_home_page()
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    <script src="../static/js/scripts.js"></script>
+</body>
+</html>
