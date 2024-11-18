@@ -1,22 +1,40 @@
-import streamlit as st
-
-def recruiting_app():
-    st.title("Recruiting App - Start Here")
-
-    # Input details
-    st.header("Company Overview")
-    mission = st.text_input("What is your company and its mission?", placeholder="E.g., Leverage AI for decision-making.")
-    st.session_state['mission'] = mission
-
-    employees = st.number_input("How many employees are in your organization?", min_value=1, step=1)
-    st.session_state['employees'] = employees
-
-    plans = st.text_input("What are your company’s plans and challenges for the next year?", placeholder="E.g., Expand markets.")
-    st.session_state['plans'] = plans
-
-    competitive_edge = st.text_input("What sets your company apart from competitors?", placeholder="E.g., Employee growth focus.")
-    st.session_state['competitive_edge'] = competitive_edge
-
-    # Navigation to the next section
-    if st.button("Next"):
-        st.session_state['current_page'] = 'role_skills'
+# Recruiting_App.py
+def recruiting_app(job_title):
+    """
+    Simulate the recruitment process by generating key questions
+    and gathering job-specific information.
+    """
+    questions = [
+        f"What are the key responsibilities for a {job_title}?",
+        f"What skills are absolutely necessary for a {job_title}?",
+        f"What benefits can attract top talent for the {job_title} role?",
+    ]
+    
+    # Simulated answers (replace with actual user input handling)
+    answers = {
+        "responsibilities": [
+            "Manage team operations",
+            "Ensure project deadlines are met",
+            "Collaborate with stakeholders"
+        ],
+        "skills": [
+            "Leadership",
+            "Time Management",
+            "Critical Thinking"
+        ],
+        "benefits": [
+            "Flexible Work Hours",
+            "Competitive Salary",
+            "Health Insurance"
+        ]
+    }
+    
+    # Generate a summary or next steps
+    summary = f"""
+Job Title: {job_title}
+Responsibilities: {', '.join(answers['responsibilities'])}
+Required Skills: {', '.join(answers['skills'])}
+Offered Benefits: {', '.join(answers['benefits'])}
+    """
+    
+    return summary

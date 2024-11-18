@@ -1,18 +1,12 @@
-import streamlit as st
-
-def app():
-    st.title("Welcome to the Home Page")
-    st.markdown("""
-    ### Overview
-    Welcome to the Recruitment Need Analysis Web App! Here you can explore various features:
-    
-    - Perform a **Recruiting Need Analysis**.
-    - Identify **Role-Specific Skills**.
-    - Create targeted **Job Descriptions**.
-    - Discover potential **Role Benefits**.
-    - View a comprehensive **Summary** of your selections.
-    - Learn more about **Our Mission**.
-
-    Navigate through the menu to get started!
-    """)
-    st.image("static/home_banner.jpg", caption="Recruitment Simplified", use_column_width=True)
+# Home.py
+def render_home_page():
+    return '''
+    <div class="home-content">
+        <h1>Welcome to the Recruitment Need Analysis Web App</h1>
+        <p>Discover the innovation that transforms recruitment processes.</p>
+        <form method="POST" action="/recruiting_app">
+            <input type="text" name="job_title" placeholder="Enter Job Title" required>
+            <button type="submit">Start Need Analysis</button>
+        </form>
+    </div>
+    '''
