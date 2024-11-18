@@ -1,0 +1,24 @@
+<!-- job_ad.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Job Ad</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="job-ad-container">
+        <header class="job-ad-header">
+            <h1>Job Ad for {{ role }}</h1>
+        </header>
+        <section class="job-ad-content">
+            <pre>{{ job_ad }}</pre>
+        </section>
+        <footer class="job-ad-footer">
+            <button onclick="window.location.href='/summary'">Back to Summary</button>
+            <button onclick="window.location.href='/'">Home</button>
+        </footer>
+    </div>
+</body>
+</html>

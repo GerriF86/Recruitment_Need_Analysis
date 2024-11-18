@@ -1,10 +1,11 @@
 # Home.py
-from flask import Flask
+from flask import Blueprint, render_template_string
 
-app = Flask(__name__)
+home_bp = Blueprint('home', __name__)
 
-def render_home_page():
-    return '''
+@home_bp.route('/')
+def home():
+    return render_template_string('''
     <div class="home-content">
         <h1>Welcome to the Recruitment Need Analysis Web App</h1>
         <p>Discover the innovation that transforms recruitment processes.</p>
@@ -13,11 +14,4 @@ def render_home_page():
             <button type="submit">Start Need Analysis</button>
         </form>
     </div>
-    '''
-
-@app.route('/')
-def home():
-    return render_home_page()
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    ''')

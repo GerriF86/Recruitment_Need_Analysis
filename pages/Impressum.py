@@ -1,6 +1,11 @@
 # Impressum.py
-def render_impressum_page():
-    return '''
+from flask import Blueprint, render_template_string
+
+impressum_bp = Blueprint('impressum', __name__)
+
+@impressum_bp.route('/impressum')
+def impressum():
+    return render_template_string('''
     <div class="impressum-content">
         <h1>Impressum</h1>
         <p>This web application is developed to streamline the recruitment process.</p>
@@ -11,4 +16,4 @@ def render_impressum_page():
             <li>Address: 123 Recruitment Avenue, Innovation City</li>
         </ul>
     </div>
-    '''
+    ''')

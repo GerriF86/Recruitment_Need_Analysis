@@ -1,37 +1,43 @@
-import streamlit as st
+# Summary.py
+from flask import Blueprint, render_template_string, request, redirect, url_for
 
-def app():
-    st.title("Recruitment Summary")
+summary_bp = Blueprint('summary', __name__)
 
-    st.subheader("Company Overview")
-    with st.expander("Edit Company Overview"):
-        st.text_input("Mission:", value=st.session_state.get("mission", ""), key="mission_edit")
-        st.number_input("Number of Employees:", value=st.session_state.get("employees", 1), key="employees_edit")
-        st.text_input("Plans and Challenges:", value=st.session_state.get("plans", ""), key="plans_edit")
-        st.text_input("Competitive Edge:", value=st.session_state.get("competitive_edge", ""), key="competitive_edge_edit")
+@summary_bp.route('/summary', methods=['GET', 'POST'])
+def summary():
+    # Placeholder content to summarize collected information
+    role = "Software Engineer"
+    skills = ["Python", "Machine Learning", "APIs"]
+    responsibilities = ["Manage team operations", "Ensure project deadlines are met", "Collaborate with stakeholders"]
+    benefits = ["Flexible Work Hours", "Competitive Salary", "Health Insurance"]
 
-    st.subheader("Role-Specific Skills")
-    with st.expander("Edit Role-Specific Skills"):
-        st.text_area("Skills:", value=", ".join(st.session_state.get("selected_skills", [])), height=100, key="skills_edit")
+    if request.method == 'POST':
+        # Redirect to generate the job ad using collected data
+        return redirect(url_for('job_ad_generator.generate_job_ad'))
 
-    st.subheader("Job Description")
-    with st.expander("Edit Job Description"):
-        st.text_area("Job Description:", value="\n".join(st.session_state.get("job_description", [])), height=200, key="job_desc_edit")
-
-    st.subheader("Role Benefits")
-    with st.expander("Edit Role Benefits"):
-        st.text_area("Benefits:", value=", ".join(st.session_state.get("role_benefits", [])), height=100, key="role_benefits_edit")
-
-    # Update session state with edited values
-    if st.button("Save Changes"):
-        st.session_state["mission"] = st.session_state["mission_edit"]
-        st.session_state["employees"] = st.session_state["employees_edit"]
-        st.session_state["plans"] = st.session_state["plans_edit"]
-        st.session_state["competitive_edge"] = st.session_state["competitive_edge_edit"]
-        st.session_state["selected_skills"] = st.session_state["skills_edit"].split(", ")
-        st.session_state["job_description"] = st.session_state["job_desc_edit"].split("\n")
-        st.session_state["role_benefits"] = st.session_state["role_benefits_edit"].split(", ")
-
-    # Provide a button for confirming final submission
-    if st.button("Finalize Summary"):
-        st.success("Recruitment summary has been finalized.")
+    return render_template_string('''
+    <div class="summary-content">
+        <h1>Summary for {{ role }}</h1>
+        <h2>Responsibilities</h2>
+        <ul>
+            {% for responsibility in responsibilities %}
+                <li>{{ responsibility }}</li>
+            {% endfor %}
+        </ul>
+        <h2>Skills</h2>
+        <ul>
+            {% for skill in skills %}
+                <li>{{ skill }}</li>
+            {% endfor %}
+        </ul>
+        <h2>Benefits</h2>
+        <ul>
+            {% for benefit in benefits %}
+                <li>{{ benefit }}</li>
+            {% endfor %}
+        </ul>
+        <form method="post">
+            <button type="submit">Generate Job Ad</button>
+        </form>
+    </div>
+    ''', role=role, skills=skills, responsibilities=responsibilities, benefits=benefits)

@@ -1,15 +1,21 @@
-import streamlit as st
-from utils.utility import fetch_from_llama
+# Role_Specific_Skills.py
+from flask import Blueprint, render_template_string
 
-def app():
-    st.title("Role-Specific Skills Suggestions")
+role_specific_skills_bp = Blueprint('role_specific_skills', __name__)
 
-    role_input = st.text_input("Enter the role you're hiring for:", placeholder="E.g., Python Developer")
+@role_specific_skills_bp.route('/role_specific_skills')
+def role_specific_skills():
+    # Placeholder content for role-specific skills
+    role = "Software Engineer"
+    skills = ["Python", "Django", "REST APIs", "Machine Learning"]
 
-    # Generate suggestions
-    if st.button("Get Skills Suggestions"):
-        if role_input:
-            skills = fetch_from_llama(f"Suggest technical skills for a {role_input}")
-            st.session_state['skills'] = skills
-        else:
-            st.warning("Please enter a role to generate skills.")
+    return render_template_string('''
+    <div class="role-specific-skills-content">
+        <h1>Skills Required for {{ role }}</h1>
+        <ul>
+            {% for skill in skills %}
+                <li>{{ skill }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    ''', role=role, skills=skills)

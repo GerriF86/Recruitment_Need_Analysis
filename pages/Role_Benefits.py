@@ -1,23 +1,21 @@
-import streamlit as st
+# Role_Benefits.py
+from flask import Blueprint, render_template_string
 
-def app():
-    st.title("Role-Specific Benefits Suggestions")
+role_benefits_bp = Blueprint('role_benefits', __name__)
 
-    role_input = st.text_input("Enter the role you're hiring for:", placeholder="E.g., Backend Developer")
+@role_benefits_bp.route('/role_benefits')
+def role_benefits():
+    # Placeholder content for role-specific benefits
+    role = "Software Engineer"
+    benefits = ["Flexible Work Hours", "Remote Work Option", "Health Insurance", "Stock Options"]
 
-    # Generate role-specific benefits
-    if st.button("Generate Role Benefits"):
-        if role_input:
-            benefits = get_suggestions(f"Suggest benefits for a {role_input}")
-            st.session_state['role_benefits'] = benefits
-        else:
-            st.warning("Please enter a role to generate benefits.")
-
-    # Display generated benefits
-    if 'role_benefits' in st.session_state:
-        st.subheader("Suggested Benefits:")
-        st.write(", ".join(st.session_state['role_benefits']))
-
-    # Finalize the summary
-    if st.button("Finish and Review Summary"):
-        st.session_state['navigate_to'] = 'Summary'
+    return render_template_string('''
+    <div class="role-benefits-content">
+        <h1>Benefits for {{ role }}</h1>
+        <ul>
+            {% for benefit in benefits %}
+                <li>{{ benefit }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    ''', role=role, benefits=benefits)
