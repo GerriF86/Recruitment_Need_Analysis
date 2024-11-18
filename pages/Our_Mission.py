@@ -1,9 +1,11 @@
 # pages/Our_Mission.py
 import streamlit as st
+import os
 
 def mission_content():
-    st.title("Our Mission")
-    st.write("""
-    Our mission is to provide the best recruitment analysis tools to help companies find suitable candidates effectively.
-    This page can contain more details about the motivation behind the project, the goals, and how we are helping solve recruitment challenges.
-    """)
+    # Load the HTML template
+    with open(os.path.join("templates", "our_mission.html"), "r") as html_file:
+        html_content = html_file.read()
+
+    # Render the HTML template in Streamlit
+    st.components.v1.html(html_content, height=600)

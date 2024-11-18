@@ -1,9 +1,11 @@
 # pages/About_Us.py
 import streamlit as st
+import os
 
 def about_us_content():
-    st.title("About Us")
-    st.write("""
-    We are a team of data scientists and recruitment experts committed to simplifying and optimizing the recruitment process.
-    Our tool helps to create a precise and detailed understanding of job requirements, aiming for better candidate fits and efficient hiring.
-    """)
+    # Load the HTML template
+    with open(os.path.join("templates", "about_us.html"), "r") as html_file:
+        html_content = html_file.read()
+
+    # Render the HTML template in Streamlit
+    st.components.v1.html(html_content, height=600)
