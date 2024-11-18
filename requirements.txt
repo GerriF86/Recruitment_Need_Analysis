@@ -1,49 +1,45 @@
-# requirements.txt
-
 # Streamlit and Related Dependencies
-streamlit>=1.40.1  # Main framework for interactive web applications.
-streamlit-folium>=0.12.0  # Integration of Folium maps into Streamlit.
-streamlit-option-menu>=0.3.5  # Updated for better compatibility.
-streamlit-multipage>=0.0.18  # Multi-page navigation for the app.
-requests>=2.31.0  # HTTP requests to interact with external APIs.
-
-# Flask Framework for Web Application
-flask==3.1.0  # Flask for the main backend framework.
-Werkzeug==3.1.3  # Dependency required by Flask.
-itsdangerous==2.2.0  # Dependency required by Flask.
-flask-cors>=3.1.0  # For handling CORS issues during development and testing.
+streamlit==1.40.1               # Main framework for interactive web applications.
+streamlit-folium>=0.12.0        # Integration of Folium maps into Streamlit.
+streamlit-option-menu>=0.3.5    # Updated for better compatibility.
+streamlit-multipage>=0.0.18     # Multi-page navigation for the app.
+streamlit-components==1.0.0     # For rendering HTML components in Streamlit.
+requests>=2.31.0                # HTTP requests to interact with external APIs.
 
 # Faiss, Sentence Transformers, and NLP Libraries
-faiss-cpu==1.7.4  # Latest stable version for efficient similarity search.
-sentence-transformers==2.6.0  # Pre-trained models for embedding sentences.
-python-dotenv>=1.0.1  # Manage environment variables for sensitive credentials.
+faiss-cpu==1.7.4                # Efficient similarity search for job skill clustering.
+sentence-transformers==2.6.0    # Pre-trained models for embedding sentences.
+python-dotenv>=1.0.1            # Manage environment variables for sensitive credentials.
 
 # Data Handling and Visualization Libraries
-pandas>=2.2.3  # Data analysis and manipulation.
-tqdm>=4.67.0  # Progress bars for data processing.
-jupyterlab>=4.2.5  # Interactive development and testing.
-altair>=4.2.2  # Interactive visualizations for data insights.
-folium>=0.14.0  # Interactive maps for job-related data visualization.
+pandas==2.2.3                   # Data analysis and manipulation.
+tqdm>=4.67.0                    # Progress bars for data processing.
+jupyterlab==4.2.5               # Interactive development and testing.
+altair==4.2.2                   # Interactive visualizations for data insights.
+folium==0.14.0                  # Interactive maps for job-related data visualization.
 
 # LangChain and Related AI Libraries
-langchain-community>=0.3.5  # Language model interaction utilities.
-langchain-openai>=0.2.5  # OpenAI model integration.
-langchain-huggingface>=0.1.2  # Hugging Face model integration.
-langchain-groq>=0.2.1  # Integration for specialized hardware.
-langchainhub>=0.1.21  # Access to pre-built models and NLP chains.
+langchain-community==0.3.5      # Language model interaction utilities.
+langchain-openai==0.2.5         # OpenAI model integration.
+langchain-huggingface==0.1.2    # Hugging Face model integration.
+langchain-groq==0.2.1           # Integration for specialized hardware.
+langchainhub==0.1.21            # Access to pre-built models and NLP chains.
 
 # PDF and Image Handling Libraries
-pypdf>=4.2.1  # PDF handling for text extraction.
-Pillow>=10.0.1  # Image processing (e.g., company logos, photos).
+pypdf==4.2.1                    # PDF handling for text extraction.
+Pillow==10.0.1                  # Image processing (e.g., company logos, photos).
 
 # Machine Learning Libraries
-scikit-learn>=1.1.0  # Essential for model training (e.g., Logistic Regression, Random Forest).
-torch>=2.0.0  # Required for transformer models like DistilBERT and BERT.
-transformers>=4.30.0  # Updated library for BERT/DistilBERT models.
+scikit-learn==1.1.0             # Essential for model training (e.g., Logistic Regression, Random Forest).
+torch==2.0.1                    # Required for transformer models like DistilBERT and BERT.
+transformers==4.30.0            # Updated library for BERT/DistilBERT models.
+
+# State Machine Management for Recruiting Process
+transitions==0.9.0              # Managing state machines, used for recruitment app flow management.
 
 # Additional Utility Libraries
-pickle-mixin>=1.0.2  # Utilities for handling pickling of trained models.
+pickle-mixin==1.0.2             # Utilities for handling pickling of trained models.
 
 # Suggested Python Version
-# Python 3.10 is recommended for compatibility across all listed libraries, 
-# particularly due to recent versions of Flask, Torch, and Transformers.
+# Python 3.10 is recommended for compatibility across all listed libraries,
+# particularly due to recent versions of Torch, Langchain, and Streamlit.
