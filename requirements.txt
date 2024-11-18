@@ -1,5 +1,5 @@
 # Streamlit and Related Dependencies
-streamlit>=1.13.0  # Streamlit is used as the main framework to create interactive web applications for the recruitment analysis.
+streamlit>=1.40.1  # Streamlit is used as the main framework to create interactive web applications for the recruitment analysis.
 streamlit-folium>=0.12.0  # Allows integration of Folium maps into Streamlit, used for visualizing geographic data in our project.
 streamlit-option-menu>=0.3.2  # Provides easy navigation options to create sidebar menus and enhance the user experience.
 streamlit-multipage>=0.0.18  # Enables multi-page navigation in our Streamlit application, allowing users to seamlessly navigate between different sections of the recruitment process.

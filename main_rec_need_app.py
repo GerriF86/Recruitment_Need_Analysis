@@ -2,6 +2,7 @@ import streamlit as st
 from multiapp import MultiApp
 
 # Import pages
+from pages.Home import app as home_app
 from pages.Recruiting_App import recruiting_app
 from pages.Role_Specific_Skills import app as role_skills_app
 from pages.Job_Description import app as job_desc_app
@@ -15,7 +16,7 @@ from pages.Our_Mission import app as our_mission_app
 app = MultiApp()
 
 # Add pages to the app
-app.add_app("Home", lambda: st.write("Welcome to the Home Page!"))
+app.add_app("Home", home_app)  # Set Home as the first page
 app.add_app("Recruiting App", recruiting_app)
 app.add_app("Role-Specific Skills", role_skills_app)
 app.add_app("Job Description", job_desc_app)
