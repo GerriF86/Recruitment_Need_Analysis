@@ -1,24 +1,20 @@
-# main_rec_need_app.py
-
 import streamlit as st
-from pages.Impressum import impressum_content
-from pages.Our_Mission import mission_content
-from pages.Recruiting_App import recruiting_app_content
-from pages.About_Us import about_us_content
 
-# Page navigation options
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Recruiting App", "Our Mission", "About Us", "Impressum"])
+# Load your CSS file
+def local_css(file_path):
+    with open(file_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# Page display logic
-if page == "Recruiting App":
-    recruiting_app_content()
-elif page == "Our Mission":
-    mission_content()
-elif page == "About Us":
-    about_us_content()
-elif page == "Impressum":
-    impressum_content()
+# Load the CSS
+local_css("static/css/style.css")
 
-# Functionality for Recruiting_App (integrating previous pages like Job Description, Skills, Benefits, Summary)
-# This function would now be inside 'pages/Recruiting_App.py' to make it a unified content handler.
+# Example Page Content
+st.title("Recruiting App")
+st.write("""
+Welcome to the Recruitment Analysis Tool. This is where you can start analyzing recruitment requirements. 
+The styling has now been updated using custom CSS.
+""")
+
+# Adding a sample button to demonstrate the button styling
+if st.button("Click Me!"):
+    st.write("Button clicked.")
