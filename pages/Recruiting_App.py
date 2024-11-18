@@ -1,10 +1,39 @@
+# pages/Recruiting_App.py
 import streamlit as st
-from transitions import Machine
 from helpers.utils import generate_job_ad_from_llm, sanitize_input, log_response
-import os
+from transitions import Machine
 
-# Define states, transitions, and questions
-# (This part remains unchanged)
+# Define states, transitions, and questions for recruitment
+states = [
+    'role_requirements',
+    'company_environment_and_benefits',
+    'summary',
+    'job_ad_generation'
+]
+
+transitions = [
+    {'trigger': 'next', 'source': 'role_requirements', 'dest': 'company_environment_and_benefits'},
+    {'trigger': 'next', 'source': 'company_environment_and_benefits', 'dest': 'summary'},
+    {'trigger': 'next', 'source': 'summary', 'dest': 'job_ad_generation'},
+    {'trigger': 'reset', 'source': '*', 'dest': 'role_requirements'}
+]
+
+define_questions = {
+    'role_requirements': [
+        "What is the job title for the role?",
+        "What are the main responsibilities for this role?",
+        "What is the expected start date?"
+    ],
+    'company_environment_and_benefits': [
+        "Describe the team and department environment.",
+        "What are the opportunities for growth and training?",
+        "What is the salary range for this role?",
+        "What benefits does the company provide (e.g., health insurance, retirement plans)?"
+    ],
+    'summary': [
+        "Review the following inputs for the role. Do you want to add anything else?"
+    ]
+}
 
 class RecruitingApp:
     def __init__(self):
@@ -43,11 +72,8 @@ class RecruitingApp:
         benefits = self.answers.get("What benefits does the company provide (e.g., health insurance, retirement plans)?", "")
 
         prompt = f"Create a job ad for a {role} position. Key skills include: {skills}. Benefits are: {benefits}."
-
-        # Use helper function to generate job ad from LLM
         job_ad = generate_job_ad_from_llm(prompt)
 
-        # Log the response for debugging and tracking purposes
         response_dict = {
             "job_title": role,
             "responsibilities": skills,
@@ -61,3 +87,12 @@ class RecruitingApp:
         if st.button("Reset Process"):
             self.reset()
 
+# Main content function for the Recruiting App
+def recruiting_app_content():
+    recruitment_app = RecruitingApp()
+    if recruitment_app.state == 'job_ad_generation':
+        recruitment_app.generate_job_ad()
+    elif recruitment_app.state == 'summary':
+        recruitment_app.summarize()
+    else:
+        recruitment_app.ask_questions()
