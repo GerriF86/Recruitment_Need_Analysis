@@ -1,20 +1,24 @@
 # main_rec_need_app.py
 
-from flask import Flask
-from pages.Impressum import impressum_bp
-from pages.Our_Mission import mission_bp
-from pages.Recruiting_App import recruiting_app_bp
-from pages.About_Us import about_us_bp
+import streamlit as st
+from pages.Impressum import impressum_content
+from pages.Our_Mission import mission_content
+from pages.Recruiting_App import recruiting_app_content
+from pages.About_Us import about_us_content
 
-# Instantiate the Flask application
-app = Flask(__name__)
+# Page navigation options
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Recruiting App", "Our Mission", "About Us", "Impressum"])
 
-# Register blueprints from different parts of the web app
-app.register_blueprint(impressum_bp)
-app.register_blueprint(mission_bp)
-app.register_blueprint(recruiting_app_bp)
-app.register_blueprint(about_us_bp)
+# Page display logic
+if page == "Recruiting App":
+    recruiting_app_content()
+elif page == "Our Mission":
+    mission_content()
+elif page == "About Us":
+    about_us_content()
+elif page == "Impressum":
+    impressum_content()
 
-if __name__ == "__main__":
-    # Run the application in production mode without debug for performance optimization
-    app.run(host='0.0.0.0', port=5000, debug=False)
+# Functionality for Recruiting_App (integrating previous pages like Job Description, Skills, Benefits, Summary)
+# This function would now be inside 'pages/Recruiting_App.py' to make it a unified content handler.
