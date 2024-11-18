@@ -1,98 +1,110 @@
-# pages/Recruiting_App.py
 import streamlit as st
-from helpers.utils import generate_job_ad_from_llm, sanitize_input, log_response
-from transitions import Machine
+from utils import generate_role_skills, generate_section_summary, generate_job_advertisement
 
-# Define states, transitions, and questions for recruitment
-states = [
-    'role_requirements',
-    'company_environment_and_benefits',
-    'summary',
-    'job_ad_generation'
-]
+# Page configuration
+st.set_page_config(page_title="Recruitment Need Analysis", page_icon="📄", layout="wide")
 
-transitions = [
-    {'trigger': 'next', 'source': 'role_requirements', 'dest': 'company_environment_and_benefits'},
-    {'trigger': 'next', 'source': 'company_environment_and_benefits', 'dest': 'summary'},
-    {'trigger': 'next', 'source': 'summary', 'dest': 'job_ad_generation'},
-    {'trigger': 'reset', 'source': '*', 'dest': 'role_requirements'}
-]
+# Navigation State
+if "page" not in st.session_state:
+    st.session_state.page = 1
 
-define_questions = {
-    'role_requirements': [
-        "What is the job title for the role?",
-        "What are the main responsibilities for this role?",
-        "What is the expected start date?"
-    ],
-    'company_environment_and_benefits': [
-        "Describe the team and department environment.",
-        "What are the opportunities for growth and training?",
-        "What is the salary range for this role?",
-        "What benefits does the company provide (e.g., health insurance, retirement plans)?"
-    ],
-    'summary': [
-        "Review the following inputs for the role. Do you want to add anything else?"
-    ]
-}
+# Navigation Functionality
+def next_page():
+    st.session_state.page += 1
 
-class RecruitingApp:
-    def __init__(self):
-        self.machine = Machine(model=self, states=states, transitions=transitions, initial='role_requirements')
-        self.answers = {}
+def previous_page():
+    st.session_state.page -= 1
 
-    def ask_questions(self):
-        current_state = self.state
-        questions = define_questions.get(current_state, [])
-        
-        st.subheader(current_state.replace('_', ' ').title())
-        for question in questions:
-            raw_answer = st.text_input(question, key=question)
-            sanitized_answer = sanitize_input(raw_answer)
-            self.answers[question] = sanitized_answer
+# Company Information Section
+if st.session_state.page == 1:
+    st.title("Company Information")
+    company_name = st.text_input("Company Name:")
+    location = st.text_input("Location:")
+    work_model = st.selectbox("Work Model:", ["Onsite", "Remote", "Hybrid"])
 
-        if st.button("Next"):
-            self.next()
+    # Dynamic questions for hybrid work model
+    if work_model == "Hybrid":
+        hybrid_ratio = st.slider("Percentage Onsite/Remote:", 0, 100, (50, 50))
 
-    def summarize(self):
-        st.subheader("Summary of the Role")
-        for question, answer in self.answers.items():
-            st.write(f"**{question}**: {answer}")
+    industry = st.text_input("Industry:")
+    company_size = st.number_input("Company Size (Number of Employees):", min_value=1, step=1)
 
-        if st.button("Generate Job Ad"):
-            self.next()
-
-        if st.button("Reset Process"):
-            self.reset()
-
-    def generate_job_ad(self):
-        st.subheader("Generated Job Ad")
-
-        role = self.answers.get("What is the job title for the role?", "")
-        skills = self.answers.get("What are the main responsibilities for this role?", "")
-        benefits = self.answers.get("What benefits does the company provide (e.g., health insurance, retirement plans)?", "")
-
-        prompt = f"Create a job ad for a {role} position. Key skills include: {skills}. Benefits are: {benefits}."
-        job_ad = generate_job_ad_from_llm(prompt)
-
-        response_dict = {
-            "job_title": role,
-            "responsibilities": skills,
-            "benefits": benefits,
-            "generated_ad": job_ad
+    # Save details and move to next page
+    if st.button("Next"):
+        st.session_state.company_info = {
+            "name": company_name,
+            "location": location,
+            "work_model": work_model,
+            "hybrid_ratio": hybrid_ratio if work_model == "Hybrid" else None,
+            "industry": industry,
+            "company_size": company_size
         }
-        log_response(response_dict)
+        next_page()
 
-        st.write(job_ad)
+# Role Information Section
+elif st.session_state.page == 2:
+    st.title("Role Information")
+    role = st.text_input("Role Title:")
+    must_have_skills = st.multiselect("Must-Have Skills:", generate_role_skills(role))
+    nice_to_have_skills = st.multiselect("Nice-to-Have Skills:", generate_role_skills(role))
 
-        if st.button("Reset Process"):
-            self.reset()
+    # Save details and move to next page
+    if st.button("Next"):
+        st.session_state.role_info = {
+            "role": role,
+            "must_have_skills": must_have_skills,
+            "nice_to_have_skills": nice_to_have_skills
+        }
+        next_page()
 
-# Main content function for the Recruiting App
-def recruiting_app_content():
-    recruitment_app = RecruitingApp()
-    if recruitment_app.state == 'job_ad_generation':
-        recruitment_app.generate_job_ad()
-    elif recruitment_app.state == 'summary':
-        recruitment_app.summarize()
-    else:
-        recruitment_app.ask_questions()
+    if st.button("Back"):
+        previous_page()
+
+# Benefits Section
+elif st.session_state.page == 3:
+    st.title("Benefits")
+    benefits = st.text_area("List the benefits offered to employees:")
+
+    # Save details and move to next page
+    if st.button("Next"):
+        st.session_state.benefits = benefits
+        next_page()
+
+    if st.button("Back"):
+        previous_page()
+
+# Recruitment Process Section
+elif st.session_state.page == 4:
+    st.title("Recruitment Process")
+    recruitment_process = st.text_area("Describe the recruitment process:")
+
+    # Save details and move to next page
+    if st.button("Next"):
+        st.session_state.recruitment_process = recruitment_process
+        next_page()
+
+    if st.button("Back"):
+        previous_page()
+
+# Job Advertisement Summary
+elif st.session_state.page == 5:
+    st.title("Job Advertisement")
+
+    # Generate summary and job ad
+    company_summary = generate_section_summary("Company Info", st.session_state.company_info)
+    role_summary = generate_section_summary("Role Info", st.session_state.role_info)
+    benefits_summary = generate_section_summary("Benefits", st.session_state.benefits)
+    recruitment_summary = generate_section_summary("Recruitment Process", st.session_state.recruitment_process)
+    job_ad = generate_job_advertisement(
+        company_summary, role_summary, benefits_summary, recruitment_summary
+    )
+
+    st.subheader("Generated Job Advertisement")
+    st.write(job_ad)
+
+    if st.button("Back"):
+        previous_page()
+
+# Footer
+st.markdown("---")
+st.caption("Recruitment Need Analysis Tool powered by AI.")

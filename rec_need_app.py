@@ -17,3 +17,13 @@ app.add_app("Impressum", impressum_content)
 
 # Run the app
 app.run()
+
+# Hide Streamlit's default navigation and footer
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)

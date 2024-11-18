@@ -3,6 +3,7 @@ import os
 import requests
 import streamlit as st
 from typing import List, Optional
+import json
 
 def validate_job_title(job_title: str) -> bool:
     """ Validate the job title to ensure it follows an appropriate format. """
@@ -34,28 +35,72 @@ def load_html_template(template_name: str) -> Optional[str]:
         st.error(f"{template_name} template not found. Please ensure the file is located in the 'templates' directory.")
         return None
 
-def generate_job_ad_from_llm(prompt: str) -> str:
-    """ Generate a job ad using the local LLM via the API. """
-    API_URL = os.getenv('LLM_API_URL', 'http://localhost:11434/api/generate')
-    payload = {"prompt": prompt}
+# Utility to query local LLM
+def query_local_llm(prompt, model="koesn/dolphin-llama3-8b", num_ctx=8192):
+    """
+    Sends a query to the local LLM server and returns the response.
+
+    Args:
+        prompt (str): The input prompt for the LLM.
+        model (str): The model to use (default: "koesn/dolphin-llama3-8b").
+        num_ctx (int): The context length for the model (default: 8192).
+
+    Returns:
+        str: The generated response from the LLM.
+    """
+    url = "http://127.0.0.1:11434/api/generate"
     headers = {"Content-Type": "application/json"}
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "num_ctx": num_ctx
+    }
 
     try:
-        response = requests.post(API_URL, json=payload, headers=headers)
+        response = requests.post(url, headers=headers, json=payload, stream=True)
         response.raise_for_status()
-        llm_output = response.json()
-        return llm_output.get("generated_text", "No text generated.")
-    except requests.RequestException as e:
-        return f"An error occurred while generating the job ad: {e}"
 
-def sanitize_input(input_text: str) -> str:
-    """ Sanitize user input to prevent security issues like script injection. """
-    return re.sub(r'[<>]', '', input_text)
+        generated_text = ""
+        for line in response.iter_lines():
+            if line:
+                data = json.loads(line.decode("utf-8"))
+                generated_text += data.get("response", "")
+                if data.get("done", False):
+                    break
+        return generated_text.strip()
+    except requests.exceptions.RequestException as e:
+        return f"Error connecting to LLM: {e}"
+    except json.JSONDecodeError as e:
+        return f"Error decoding JSON response: {e}"
 
-def log_response(response: dict, log_file: str = "responses.log") -> None:
-    """ Log the generated job ad response to a file. """
-    try:
-        with open(log_file, "a") as f:
-            f.write(f"{response}\n")
-    except Exception as e:
-        st.error(f"An error occurred while logging the response: {e}")
+
+# Function to generate role-specific skills
+def generate_role_skills(role):
+    prompt = f"List 10 role-specific skills for the role: {role}."
+    return query_local_llm(prompt)
+
+
+# Function to generate section summaries
+def generate_section_summary(section, details):
+    prompt = f"Summarize the following {section} information:\n{details}"
+    return query_local_llm(prompt)
+
+
+# Function to create a job advertisement
+def generate_job_advertisement(company_info, role_info, benefits, recruitment_process):
+    prompt = f"""
+    Create a job advertisement based on the following details:
+    
+    **Company Information:**
+    {company_info}
+    
+    **Role Information:**
+    {role_info}
+    
+    **Benefits:**
+    {benefits}
+    
+    **Recruitment Process:**
+    {recruitment_process}
+    """
+    return query_local_llm(prompt)
