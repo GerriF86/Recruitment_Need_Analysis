@@ -1,10 +1,11 @@
 import streamlit as st
 import sys
 from pathlib import Path
-from helpers.state_management import change_page, cached_generate_role_skills  # Updated to correct helper
-from helpers.llm_utils import query_local_llm, query_remote_api, query_rag  # LLM-related functions
 import os
 from dotenv import load_dotenv
+from helpers.state_management import cached_generate_role_skills, change_page  # Corrected import for state management
+from helpers.llm_utils import query_local_llm, query_remote_api, query_rag  # LLM-related functions
+from helpers.utils import load_html_template
 
 # Load environment variables
 load_dotenv()
@@ -12,15 +13,14 @@ load_dotenv()
 # Dynamically add the project root to the Python path to fix import issues
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-# Load Groq API key
+# Set page configuration - This must be the first Streamlit command in the script
+st.set_page_config(page_title="Recruitment Need Analysis", page_icon="📄", layout="wide")
+
 groq_key = os.getenv("groq_key")
 if not groq_key:
     groq_key = st.sidebar.text_input("Enter Groq API Key:", type="password")
     if groq_key:
         st.session_state["groq_key"] = groq_key
-
-# Page Configuration
-st.set_page_config(page_title="Recruitment Need Analysis", page_icon="📄", layout="wide")
 
 # Initialize Session State
 session_keys = ["page", "company_info", "role_info", "benefits", "recruitment_process", "model_type"]
@@ -39,7 +39,7 @@ def query_model(prompt: str) -> str:
         st.error("Invalid model type selected.")
         return ""
 
-# Main App Logic for Recruitment Need Analysis
+# Import page components from helpers (defined in `ui_components.py`)
 from helpers.ui_components import (
     company_info_page,
     role_info_page,
@@ -49,6 +49,7 @@ from helpers.ui_components import (
     job_ad_page
 )
 
+# Page Mapping
 pages = {
     1: company_info_page,
     2: role_info_page,
@@ -58,6 +59,7 @@ pages = {
     6: job_ad_page,
 }
 
+# Get and run current page
 current_page = st.session_state.page
 pages.get(current_page, company_info_page)()
 
