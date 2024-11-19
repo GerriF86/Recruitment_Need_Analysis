@@ -1,7 +1,3 @@
-import streamlit as st
+from rec_need_app import impressum_page
 
-st.title("Impressum")
-st.markdown("""
-        ### Legal Information
-        All rights reserved. Unauthorized use is prohibited.
-    """)
+impressum_page()
