@@ -17,7 +17,7 @@ class MultiApp:
         self.apply_custom_style()
 
         # Create a styled sidebar for app selection
-        st.sidebar.title("🚀 Recruitment Hub")
+        st.sidebar.title("🚀 Want to find out more?")
         st.sidebar.markdown("### Choose a section:")
         app = st.sidebar.selectbox(
             "",

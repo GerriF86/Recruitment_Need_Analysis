@@ -33,12 +33,10 @@ def render_header():
     st.title("Recruitment Need Analysis Tool")
     st.markdown(
         """
-        This tool helps you analyze recruitment needs by guiding you through:
-        - **Company Information**
-        - **Role-Specific Details**
-        - **Benefits and Compensation**
-        - **Recruitment Process**
-        - **Job Advertisement Generation**
+        ### How It Works
+        1. Enter the role name (e.g., "Data Analyst") into our app.
+        2. Engage in an intuitive question-and-answer flow tailored to your organizational structure.
+        3. Receive a complete, structured summary of the role, ready to create targeted job ads or guide recruitment strategies.
         """
     )
     st.markdown("---")
