@@ -1,10 +1,22 @@
 import streamlit as st
-from functools import lru_cache
-from helpers.utils import (
-    generate_role_skills,
-    generate_section_summary,
-    generate_job_advertisement,
-)
+import sys
+from pathlib import Path
+from helpers.utils import validate_job_title, format_response, extract_keywords_from_text, load_html_template, query_local_llm, generate_role_skills, generate_section_summary, generate_job_advertisement
+
+
+# Dynamically add the project root to the Python path to fix import issues
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+# Safely import utils with error handling
+try:
+    from helpers.utils import (
+        generate_role_skills,
+        generate_section_summary,
+        generate_job_advertisement,
+    )
+except ImportError as e:
+    st.error(f"Error loading helpers: {e}")
+    st.stop()
 
 # Page Configuration
 st.set_page_config(
@@ -13,42 +25,33 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-def recruiting_app_content():
-    return "This is the content of the recruiting app."
 
 # Initialize Session State
-for key in ["page", "company_info", "role_info", "benefits", "recruitment_process"]:
-    if key not in st.session_state:
-        st.session_state[key] = 1 if key == "page" else None
+session_keys = ["page", "company_info", "role_info", "benefits", "recruitment_process"]
+for key in session_keys:
+    st.session_state.setdefault(key, 1 if key == "page" else None)
 
 # Navigation Functions
-def next_page():
-    st.session_state.page += 1
+def change_page(step: int):
+    st.session_state.page += step
 
-def previous_page():
-    st.session_state.page -= 1
-
-# Header and Instructions
+# Common Header
 def render_header():
     st.title("Recruitment Need Analysis Tool")
-    st.markdown(
-        """
+    st.markdown("""
         ### How It Works
         1. Enter the role name (e.g., "Data Analyst") into our app.
         2. Engage in an intuitive question-and-answer flow tailored to your organizational structure.
         3. Receive a complete, structured summary of the role, ready to create targeted job ads or guide recruitment strategies.
-        """
-    )
-    st.markdown("---")
-
+        ---
+    """)
 
 # Caching Skill Generation for Performance
-@lru_cache(maxsize=128)
+@st.cache_data
 def cached_generate_role_skills(role):
     return generate_role_skills(role)
 
-
-# Page 1: Company Information
+# Page Components
 def company_info_page():
     render_header()
     st.header("Company Information")
@@ -56,10 +59,9 @@ def company_info_page():
     company_name = st.text_input("Company Name:")
     location = st.text_input("Location:")
     work_model = st.selectbox("Work Model:", ["Onsite", "Remote", "Hybrid"])
-
-    # Additional input for hybrid work model
-    hybrid_ratio = st.slider("Percentage Onsite/Remote:", 0, 100, (50, 50)) if work_model == "Hybrid" else None
-
+    hybrid_ratio = (
+        st.slider("Percentage Onsite/Remote:", 0, 100, (50, 50)) if work_model == "Hybrid" else None
+    )
     industry = st.text_input("Industry:")
     company_size = st.number_input("Company Size (Number of Employees):", min_value=1, step=1)
 
@@ -72,10 +74,8 @@ def company_info_page():
             "industry": industry,
             "company_size": company_size,
         }
-        next_page()
+        change_page(1)
 
-
-# Page 2: Role-Specific Information
 def role_info_page():
     render_header()
     st.header("Role Information")
@@ -93,13 +93,11 @@ def role_info_page():
             "must_have_skills": must_have_skills,
             "nice_to_have_skills": nice_to_have_skills,
         }
-        next_page()
+        change_page(1)
 
     if st.button("Back"):
-        previous_page()
+        change_page(-1)
 
-
-# Page 3: Benefits and Compensation
 def benefits_page():
     render_header()
     st.header("Benefits and Compensation")
@@ -108,13 +106,11 @@ def benefits_page():
 
     if st.button("Next") and benefits:
         st.session_state.benefits = benefits
-        next_page()
+        change_page(1)
 
     if st.button("Back"):
-        previous_page()
+        change_page(-1)
 
-
-# Page 4: Recruitment Process
 def recruitment_process_page():
     render_header()
     st.header("Recruitment Process")
@@ -123,13 +119,11 @@ def recruitment_process_page():
 
     if st.button("Next") and recruitment_process:
         st.session_state.recruitment_process = recruitment_process
-        next_page()
+        change_page(1)
 
     if st.button("Back"):
-        previous_page()
+        change_page(-1)
 
-
-# Page 5: Job Advertisement
 def job_ad_page():
     render_header()
     st.header("Generated Job Advertisement")
@@ -141,11 +135,9 @@ def job_ad_page():
     recruitment_summary = generate_section_summary("Recruitment Process", st.session_state.get("recruitment_process", ""))
     job_ad = generate_job_advertisement(company_summary, role_summary, benefits_summary, recruitment_summary)
 
-    # Display the job ad
+    # Display and download the job ad
     st.subheader("Job Advertisement")
     st.write(job_ad)
-
-    # Download option
     st.download_button(
         label="Download Job Advertisement",
         data=job_ad,
@@ -154,12 +146,11 @@ def job_ad_page():
     )
 
     if st.button("Back"):
-        previous_page()
-
+        change_page(-1)
 
 # Main App Navigation
 def main():
-    page_mapping = {
+    pages = {
         1: company_info_page,
         2: role_info_page,
         3: benefits_page,
@@ -167,19 +158,18 @@ def main():
         5: job_ad_page,
     }
 
-    current_page = page_mapping.get(st.session_state.page, company_info_page)
-    current_page()
-
+    # Dynamically call the current page function
+    current_page = st.session_state.page
+    pages.get(current_page, company_info_page)()
 
 if __name__ == "__main__":
     main()
 
 # Footer Styling
-hide_streamlit_style = """
+st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+""", unsafe_allow_html=True)

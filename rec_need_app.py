@@ -1,41 +1,100 @@
 import streamlit as st
-from multiapp import MultiApp
-from pages.Recruiting_App import recruiting_app_content
-from pages.Impressum import impressum_content
-from pages.Our_Mission import our_mission_content
-from pages.About_Us import about_us_content
-from pages.The_Magic_Behind import the_magic_behind_content  # Add this import
+from helpers.utils import (
+    validate_job_title,
+    format_response,
+    extract_keywords_from_text,
+    load_html_template,
+    query_local_llm,
+    generate_role_skills,
+    generate_section_summary,
+    generate_job_advertisement,
+)
 
-# Instantiate the MultiApp class
-app = MultiApp()
+# Custom CSS for styling
+def custom_css():
+    st.markdown("""
+        <style>
+        body { background-color: #1f1f1f; color: #ffffff; font-family: 'Roboto', sans-serif; }
+        h1, h2, h3 { color: #00d4ff; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8); }
+        .stButton>button { background: linear-gradient(90deg, #007cf0, #00dfd8); color: white; font-size: 18px; border-radius: 8px; padding: 10px 20px; }
+        footer {visibility: hidden;}
+        #MainMenu {visibility: hidden;}
+        </style>
+    """, unsafe_allow_html=True)
 
-# Register the pages
-app.add_app("Recruiting App", recruiting_app_content)
-app.add_app("Our Mission", our_mission_content)
-app.add_app("About Us", about_us_content)
-app.add_app("The Magic Behind the Scenes", the_magic_behind_content)  # Register new page
-app.add_app("Impressum", impressum_content)
+# Define pages as individual functions
+def home_page():
+    st.title("Welcome to the Recruitment Revolution")
+    st.markdown("""
+        ### Your Ultimate Hiring Companion
+        Harness the power of cutting-edge AI to revolutionize the way you hire.
+        Navigate to any section from the sidebar to begin.
+    """)
+    st.image("https://via.placeholder.com/800x400", caption="Streamline Your Recruitment Process")
 
-# Main Page Content
-def main_page_content():
-    st.title("Recruitment Need Analysis App")
-    st.markdown(
-        """
-        **Empowering Better Recruitment Decisions**
+def about_us_page():
+    st.title("About Us")
+    st.markdown("""
+        ### Revolutionizing Recruitment Through AI
+        Our app leverages **Llama**, a large language model trained on millions of job-related data points, to understand recruitment like never before.
+    """)
 
-        In the ever-competitive job market, the key to successful recruitment lies in understanding the unique needs of each role. Our Recruitment Need Analysis App is designed to help organizations avoid critical information loss during the initial stages of hiring. By gathering and structuring job-specific information through intelligent and dynamic questioning, the app ensures clarity, precision, and alignment across stakeholders.
+def our_mission_page():
+    st.title("Our Mission")
+    st.markdown("""
+        ### Changing Recruitment for Good
+        Our mission is to empower businesses with a recruitment tool that combines state-of-the-art AI and intuitive design to make hiring smarter.
+    """)
 
-        ### Why Choose Our Solution?
-        - **Tailored Insights:** Dive deeper into the "hidden" aspects of job roles—beyond just job titles and descriptions.
-        - **Efficiency Redefined:** Streamline your recruitment process by capturing must-have and nice-to-have requirements with precision.
-        - **Reduced Turnover:** Hire right the first time by ensuring alignment of expectations between candidates and employers.
+def need_analysis_page():
+    st.title("Need Analysis")
+    st.markdown("Enter detailed role and organizational information to generate a tailored job ad.")
+    company_name = st.text_input("Company Name:")
+    role = st.text_input("Role Title:")
+    if role:
+        skills = generate_role_skills(role)
+        st.multiselect("Must-Have Skills:", skills)
+        st.multiselect("Nice-to-Have Skills:", skills)
 
-        ### Revolutionizing Recruitment
-        With our cutting-edge NLP and state-of-the-art technology stack, the app adapts to the complexity of your organizational needs, ensuring no information is left behind. Invest in your recruitment success today!
-        """
+def impressum_page():
+    st.title("Impressum")
+    st.markdown("""
+        ### Legal Information
+        All rights reserved. Unauthorized use is prohibited.
+    """)
+
+def magic_behind_the_scenes_page():
+    st.title("The Magic Behind the Scenes")
+    st.markdown("""
+        ### Cutting-Edge Recruitment Technology
+        Powered by **local large language models**, **state machines**, and **graph databases**.
+    """)
+
+# Main app logic
+def main():
+    custom_css()
+
+    # Sidebar navigation
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio(
+        "Go to:",
+        ["Home", "About Us", "Our Mission", "Need Analysis", "Impressum", "The Magic Behind the Scenes"]
     )
 
-# Set the main page to run first
+    # Page rendering logic
+    if page == "Home":
+        home_page()
+    elif page == "About Us":
+        about_us_page()
+    elif page == "Our Mission":
+        our_mission_page()
+    elif page == "Need Analysis":
+        need_analysis_page()
+    elif page == "Impressum":
+        impressum_page()
+    elif page == "The Magic Behind the Scenes":
+        magic_behind_the_scenes_page()
+
+# Run the app
 if __name__ == "__main__":
-    main_page_content()
-    app.run()
+    main()

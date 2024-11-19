@@ -140,13 +140,13 @@ def generate_job_advertisement(company_info: str, role_info: str, benefits: str,
         return "Insufficient data to generate a job advertisement."
 
     prompt = f"""
-    Write a professional job advertisement with the following details:
+    Write a professional job advertisement with the following details, presented and phrased in a way that attracts the target group and automatically attach an (m/w/d) at the end of the jobtitle:
 
     Company Information:
     {company_info}
 
     Role Information:
-    {role_info}
+    {role_info }
 
     Benefits:
     {benefits}
