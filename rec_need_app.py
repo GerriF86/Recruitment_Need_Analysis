@@ -12,8 +12,8 @@ groq_key = os.getenv("groq_key")
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 # Import from helpers directory
-from helpers.state_management import cached_generate_role_skills, change_page  # Corrected import
-from helpers.llm_utils import query_local_llm, query_remote_api, query_rag  # Import LLM-related functions
+from helpers.state_management import cached_generate_role_skills, change_page  # State management functions
+from helpers.llm_utils import query_local_llm, query_remote_api, query_rag  # LLM-related functions
 from helpers.utils import format_response, extract_keywords_from_text, load_html_template  # General utilities
 
 # Custom CSS for styling
