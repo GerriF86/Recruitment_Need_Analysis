@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from helpers.state_management import cached_generate_role_skills, change_page  # Corrected import for state management
 from helpers.llm_utils import query_local_llm, query_remote_api, query_rag  # LLM-related functions
 from helpers.utils import load_html_template
+from helpers.state_management import cached_generate_role_skills  # Correct file for cached_generate_role_skills
 
 # Load environment variables
 load_dotenv()

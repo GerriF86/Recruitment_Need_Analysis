@@ -13,3 +13,8 @@ def change_page(step: int):
 def cached_generate_role_skills(role):
     # Using generate_role_skills from llm_utils.py
     return generate_role_skills(role)
+
+# Caching Skill Generation for Performance
+@st.cache_data
+def cached_generate_role_skills(role):
+    return generate_role_skills(role)
