@@ -1,15 +1,18 @@
-import re
 import os
+import re
 import requests
-import streamlit as st
-from typing import List, Optional
 import json
+import streamlit as st
+from typing import List, Dict, Optional
+from pathlib import Path
+from dotenv import load_dotenv
 
+# Function Definitions
 
+# Utility Functions
 def validate_job_title(job_title: str) -> bool:
     """Validate the job title to ensure it follows an appropriate format."""
     return bool(re.match(r"^[A-Za-z0-9 ]+$", job_title))
-
 
 def format_response(response: dict) -> str:
     """Format the response dictionary into a presentable HTML format."""
@@ -22,11 +25,9 @@ def format_response(response: dict) -> str:
     </div>
     """
 
-
 def extract_keywords_from_text(text: str) -> List[str]:
     """Placeholder for NLP-based keyword extraction from a given text input."""
-    return ["Leadership", "Team Management", "Critical Thinking"]  # Example
-
+    return ["Leadership", "Team Management", "Critical Thinking"]
 
 def load_html_template(template_name: str) -> Optional[str]:
     """Load an HTML template from the templates directory."""
@@ -37,19 +38,9 @@ def load_html_template(template_name: str) -> Optional[str]:
         st.error(f"Template '{template_name}' not found. Please ensure it exists in the 'templates' directory.")
         return None
 
-
+# LLM Query Functions
 def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx: int = 8192) -> str:
-    """
-    Query a local LLM server to generate a response based on a prompt.
-
-    Args:
-        prompt (str): Input prompt for the LLM.
-        model (str): Model name to use for generation.
-        num_ctx (int): Context length for the model.
-
-    Returns:
-        str: Generated response from the LLM.
-    """
+    """Query a local LLM server to generate a response based on a prompt."""
     url = "http://127.0.0.1:11434/api/generate"
     headers = {"Content-Type": "application/json"}
     payload = {"model": model, "prompt": prompt, "num_ctx": num_ctx}
@@ -73,17 +64,19 @@ def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx
         st.error(f"Error decoding LLM response: {e}")
         return ""
 
+def query_remote_api(prompt: str, api_key: str, timeout: int = 15) -> str:
+    """Query a remote API to generate a response based on a prompt."""
+    # Placeholder for remote API logic
+    return ""
 
+def query_rag(prompt: str, api_key: str, retrieval_count: int = 5, confidence_threshold: float = 0.5) -> str:
+    """Query a Retrieval-Augmented Generation (RAG) API."""
+    # Placeholder for RAG API logic
+    return ""
+
+# Skill and Summary Generators
 def generate_role_skills(role: str) -> List[str]:
-    """
-    Generate a list of key skills for a specific role using the local LLM.
-
-    Args:
-        role (str): The job role to generate skills for.
-
-    Returns:
-        List[str]: A list of skills or an empty list if generation fails.
-    """
+    """Generate a list of key skills for a specific role using the local LLM."""
     if not role:
         st.warning("Role is empty. Please provide a valid job role.")
         return []
@@ -98,18 +91,8 @@ def generate_role_skills(role: str) -> List[str]:
     skills = [skill.strip() for skill in skills_response.split("\n") if skill.strip()]
     return skills or ["No skills found. Please try a different role."]
 
-
 def generate_section_summary(section: str, details: str) -> str:
-    """
-    Generate a summary for a specific section using the local LLM.
-
-    Args:
-        section (str): The name of the section to summarize.
-        details (str): Details to include in the summary.
-
-    Returns:
-        str: A summary of the section or an error message if generation fails.
-    """
+    """Generate a summary for a specific section using the local LLM."""
     if not details:
         return f"No details provided for {section}."
 
@@ -122,31 +105,19 @@ def generate_section_summary(section: str, details: str) -> str:
 
     return summary
 
-
 def generate_job_advertisement(company_info: str, role_info: str, benefits: str, recruitment_process: str) -> str:
-    """
-    Generate a professional job advertisement using provided inputs.
-
-    Args:
-        company_info (str): Summary of the company information.
-        role_info (str): Summary of the role information.
-        benefits (str): List of benefits offered.
-        recruitment_process (str): Description of the recruitment process.
-
-    Returns:
-        str: A job advertisement or an error message if generation fails.
-    """
+    """Generate a professional job advertisement using provided inputs."""
     if not any([company_info, role_info, benefits, recruitment_process]):
         return "Insufficient data to generate a job advertisement."
 
     prompt = f"""
-    Write a professional job advertisement with the following details, presented and phrased in a way that attracts the target group and automatically attach an (m/w/d) at the end of the jobtitle:
+    Write a professional job advertisement with the following details, presented and phrased in a way that attracts the target group and automatically attach an (m/w/d) at the end of the job title:
 
     Company Information:
     {company_info}
 
     Role Information:
-    {role_info }
+    {role_info}
 
     Benefits:
     {benefits}
@@ -154,7 +125,6 @@ def generate_job_advertisement(company_info: str, role_info: str, benefits: str,
     Recruitment Process:
     {recruitment_process}
     """
-
     job_ad = query_local_llm(prompt)
 
     if not job_ad:
@@ -162,3 +132,30 @@ def generate_job_advertisement(company_info: str, role_info: str, benefits: str,
         return "Job advertisement generation failed. Please try again."
 
     return job_ad
+
+# State Management
+def change_page(step: int):
+    """Change the current page in the Streamlit app."""
+    st.session_state.page += step
+
+@st.cache_data
+def cached_generate_role_skills(role):
+    """Cache the skill generation process for performance."""
+    return generate_role_skills(role)
+
+# Categorization
+def categorize_skills(skills: List[str]) -> Dict[str, List[str]]:
+    """Categorize skills into predefined categories."""
+    categories = {"Technical Skills": [], "Soft Skills": [], "Management Skills": [], "Industry Knowledge": [], "Miscellaneous": []}
+    for skill in skills:
+        if "tech" in skill.lower():
+            categories["Technical Skills"].append(skill)
+        elif "soft" in skill.lower():
+            categories["Soft Skills"].append(skill)
+        elif "manager" in skill.lower():
+            categories["Management Skills"].append(skill)
+        elif "industry" in skill.lower():
+            categories["Industry Knowledge"].append(skill)
+        else:
+            categories["Miscellaneous"].append(skill)
+    return categories
