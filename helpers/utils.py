@@ -31,6 +31,71 @@ def query_groq_model(prompt, model_name="llama3-8b-8192"):
     return None
 
 # Query Functions
+
+def generate_interview_preparation_sheet(data: Dict[str, Any]) -> str:
+    """
+    Generate an interview preparation sheet based on the gathered information.
+
+    Args:
+        data (Dict[str, Any]): A dictionary containing gathered information. Example keys:
+            - "job_title"
+            - "role_requirements"
+            - "company_benefits"
+            - "recruitment_steps"
+            - "candidate_attributes"
+            - "additional_notes"
+
+    Returns:
+        str: A formatted interview preparation sheet.
+    """
+    # Ensure `query_local_llm` is accessible
+    try:
+        from helpers.utils import query_local_llm
+    except ImportError:
+        st.error("The `query_local_llm` function is missing or not properly imported.")
+        return ""
+
+    # Validate input data
+    required_keys = ["job_title", "role_requirements", "company_benefits", "recruitment_steps", "candidate_attributes"]
+    missing_keys = [key for key in required_keys if key not in data]
+    if missing_keys:
+        st.error(f"Missing required keys in data: {', '.join(missing_keys)}")
+        return ""
+
+    # Prepare the prompt for the LLM
+    prompt = f"""
+    You are an HR assistant helping to create a structured interview preparation sheet.
+    Based on the following information, generate a detailed preparation document for the interviewer:
+    
+    Job Title: {data.get("job_title", "N/A")}
+    Role Requirements: {data.get("role_requirements", "N/A")}
+    Company Benefits: {data.get("company_benefits", "N/A")}
+    Recruitment Steps: {data.get("recruitment_steps", "N/A")}
+    Candidate Attributes: {data.get("candidate_attributes", "N/A")}
+    Additional Notes: {data.get("additional_notes", "None")}
+    
+    Format the preparation sheet into sections such as:
+    - Overview of the Role
+    - Key Responsibilities
+    - Candidate Requirements
+    - Benefits and Incentives
+    - Interview Structure
+    - Additional Notes
+    
+    Provide the document in a clean and professional tone.
+    """
+
+    # Query the local LLM
+    try:
+        preparation_sheet = query_local_llm(prompt)
+        if not preparation_sheet or len(preparation_sheet.strip()) == 0:
+            raise ValueError("The LLM returned an empty or invalid response.")
+    except Exception as e:
+        st.error(f"Error while querying the local LLM: {e}")
+        return ""
+
+    return preparation_sheet
+
 def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx: int = 8192) -> str:
     """Query a local LLM server to generate a response based on a prompt."""
     url = "http://127.0.0.1:11434/api/generate"
@@ -79,23 +144,26 @@ def query_rag(prompt: str, api_key: str, retrieval_count: int = 5, confidence_th
 # Skill and Summary Generators
 @st.cache_data
 def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
-    """Generate and cache skills for a specific role, categorizing them into predefined categories."""
+    """Generate and cache skills for a specific role with sliders for intensity adjustments."""
     if not role:
         st.warning("Role is empty. Please provide a valid job role.")
         return {"Error": ["No role specified."]}
 
     categories = {
-        "Technical Skills": [],
+        "Programming Languages": [],
+        "Libraries": [],
         "Soft Skills": [],
+        "Technical Skills": [],
         "Management Skills": [],
         "Analytical Skills": [],
         "Tools/Technologies": []
     }
 
+    # Updated prompt to align with specific categories
     prompt = (
-        f"You are an expert HR consultant. List up to 25 skills categorized into "
-        f"Technical Skills, Soft Skills, Management Skills, Analytical Skills, "
-        f"and Tools/Technologies for the role '{role}'."
+        f"You are an expert HR consultant. For the role '{role}', list the top 5 Programming Languages, "
+        f"top 15 Libraries, and top 10 Soft Skills, along with other skills categorized as "
+        f"Technical Skills, Management Skills, Analytical Skills, and Tools/Technologies."
     )
 
     try:
@@ -108,28 +176,44 @@ def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
             raise ValueError("Empty skill list generated.")
 
         predefined_keywords = {
-            "Technical Skills": ["programming", "coding", "cloud", "networking", "engineering"],
+            "Programming Languages": ["Python", "Java", "C++", "JavaScript", "SQL"],
+            "Libraries": ["TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy"],
             "Soft Skills": ["communication", "teamwork", "adaptability", "problem-solving"],
+            "Technical Skills": ["programming", "coding", "cloud", "networking", "engineering"],
             "Management Skills": ["leadership", "planning", "strategy", "risk management"],
             "Analytical Skills": ["data", "analysis", "decision-making", "quantitative"],
             "Tools/Technologies": ["Excel", "Tableau", "Power BI", "SQL", "Python"]
         }
 
+        # Categorize skills into predefined sections
         for skill in skills:
             added = False
             for category, keywords in predefined_keywords.items():
                 if any(keyword.lower() in skill.lower() for keyword in keywords):
-                    if len(categories[category]) < 5:
+                    if len(categories[category]) < 15:  # Allow up to 15 for Libraries and others
                         categories[category].append(skill)
                         added = True
                         break
 
-            if not added and len(categories["Tools/Technologies"]) < 5:
+            if not added and len(categories["Tools/Technologies"]) < 15:
                 categories["Tools/Technologies"].append(skill)
 
-        total_skills = sum(len(skills) for skills in categories.values())
-        if total_skills > 25:
-            categories = {k: v[:5] for k, v in categories.items()}
+        # UI to prioritize and adjust skill levels
+        st.subheader(f"Skills for {role}")
+        skill_levels = {}
+
+        for category, skill_list in categories.items():
+            st.markdown(f"### {category}")
+            for skill in skill_list:
+                skill_levels[skill] = st.slider(
+                    f"{skill} (Nice to Have ↔ Must Have)",
+                    min_value=0,
+                    max_value=10,
+                    value=5
+                )
+
+        # Cache skill adjustments as a dictionary
+        st.session_state[f"{role}_skills"] = skill_levels
 
         return categories
 
@@ -226,7 +310,7 @@ def change_page(new_page: int):
 @st.cache_data
 def cached_generate_role_benefits(role: str):
     """
-    Generate and cache a list of role-specific benefits.
+    Generate and cache a list of role-specific benefits, described with less than 5 words.
     """
     if not role:
         st.warning("Role is empty. Please provide a valid job role.")

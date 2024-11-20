@@ -2,13 +2,12 @@
 page_title = "Recruitment Need Analysis"
 page_icon = "🏠"
 layout = "wide"
-theme = "auto"  # Options could be 'light', 'dark', 'auto'
+theme = "auto"  # Options: 'light', 'dark', 'auto'
 
 [api]
 groq_key = "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"
 
 [pages]
-
 # Home Page Configurations
 home_page_title = "Welcome to the Future of Recruitment"
 home_page_subtitle = "Effortlessly pinpoint the right skills for your next hire"
@@ -23,15 +22,15 @@ mission_title = "Our Mission"
 mission_subtitle = "Transforming recruitment, one step at a time."
 mission_content = """
 Our mission is simple yet powerful: to transform recruitment from a daunting process into an empowering experience. 
-We believe that hiring the right person for the right role is the foundation of every successful company. By delivering a recruitment analysis 
+Hiring the right person for the right role is the foundation of every successful company. By delivering a recruitment analysis 
 tool that is insightful, easy to use, and profoundly secure, we empower recruiters and managers to make informed decisions with precision and clarity.
 """
 
-# The Magic Behind the Scenes Page Configurations
+# Behind the Scenes Page Configurations
 behind_scenes_title = "The Magic Behind the Scenes"
 behind_scenes_subtitle = "How we blend technology with recruitment expertise."
 behind_scenes_content = """
-What makes our Recruitment Need Analysis tool extraordinary? The answer lies in our innovative blend of cutting-edge technology and deep recruitment expertise. 
+What makes our Recruitment Need Analysis tool extraordinary? The answer lies in our innovative blend of cutting-edge technology and deep recruitment expertise.
 Behind the intuitive interface, we harness the power of advanced NLP models, data analytics, and machine learning to simplify the complex dynamics of hiring.
 We analyze market trends, skill requirements, and role-specific nuances to provide you with hyper-relevant suggestions tailored to your specific needs.
 """
@@ -61,17 +60,18 @@ It uses insights from the company information, role requirements, and more to en
 """
 
 [security]
-use_https = false
-data_protection_level = "low"
-encryption_method = "AES256"  # Choose from 'AES128', 'AES256', etc.
+use_https = true  # Recommended for production
+data_protection_level = "high"  # Options: 'low', 'medium', 'high'
+encryption_method = "AES256"  # Options: 'AES128', 'AES256', etc.
 user_authentication = "OAuth2"  # Authentication method used for the app
 
 [features]
 enable_dynamic_skill_suggestions = true
 use_sentiment_analysis = true
 enable_realtime_collaboration = true  # Allow multiple recruiters to work on the same page in real-time
+support_advanced_visualizations = true  # Enable charts, graphs, and data visualization
 
-# About Us Page Configurations
+[about_us]
 about_us_title = "About Us"
 about_us_subtitle = "Meet the Visionaries Behind the Innovation"
 about_us_content = """

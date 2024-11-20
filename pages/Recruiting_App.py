@@ -32,24 +32,6 @@ st.set_page_config(
 # Load the Groq API Key
 groq_key = config["api"]["groq_key"]
 
-# Function to query the Groq API
-def query_groq_model(prompt, model_name="llama3-8b"):
-    url = "https://console.groq.com/playground"
-    headers = {
-        "Authorization": f"Bearer {groq_key}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": model_name,
-        "messages": [{"role": "user", "content": prompt}]
-    }
-    response = requests.post(url, json=payload, headers=headers)
-    if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
-    else:
-        st.error(f"Error connecting to Groq API: {response.status_code}, {response.text}")
-        return None
-
 # Initialize Session State
 session_keys = ["page", "company_info", "role_info", "benefits", "recruitment_process", "must_have_skills", "nice_to_have_skills", "selected_benefits", "selected_recruitment_steps", "model_choice"]
 for key in session_keys:
@@ -59,7 +41,7 @@ for key in session_keys:
 # Model Selection by User
 model_choice = st.selectbox(
     "Select Model Type:",
-    options=["Local Ollama (High Quality, Slower)", "Groq llama3-8b (Fast, Slightly Lower Quality)"],
+    options=["Olivia an Gerrits LLM (High Quality, Slow Performance)", "Groq llama (Standard Quality, Fast Performance)"],
     key="model_choice"
 )
 
@@ -76,15 +58,6 @@ def user_model_query(prompt):
 
 # UI for User Prompt and Generating Response
 st.title("Recruitment Need Analysis - Model Interaction")
-
-prompt = st.text_area("Enter your prompt here:")
-
-if st.button("Generate Response"):
-    if prompt:
-        response = user_model_query(prompt)
-        st.write(response)
-    else:
-        st.warning("Please enter a prompt before generating a response.")
 
 # Page functions
 def change_page(new_page: int):
@@ -121,56 +94,79 @@ def company_info_page():
 
 def role_info_page():
     st.title("Role Information")
-    role = st.text_input("Role Title:")
-    salary_min = st.number_input("Minimum Salary Expectation:", min_value=0, step=1000)
-    salary_max = st.number_input("Maximum Salary Expectation:", min_value=0, step=1000)
+    
+    # Job Role Title
+    role = st.text_input("Role Title:", placeholder="e.g., Data Scientist")
+    
+    # Salary Range Input using a Slider
+    st.markdown("### Salary Expectation")
+    salary_range = st.slider(
+        "Select the salary range:",
+        min_value=30000,
+        max_value=500000,
+        value=(50000, 150000),
+        step=10000,
+        help="Move the sliders to set the minimum and maximum salary expectations."
+    )
+    salary_min, salary_max = salary_range
 
-    if role and not validate_job_title(role):
-        st.error("Invalid role title. Please enter a valid one.")
-        return
+    # Place of Work
+    place_of_work = st.text_input(
+        "Place of Work:",
+        placeholder="e.g., Berlin, Germany",
+        help="Enter the location where the job will be performed."
+    )
 
-    if role:
-        st.write("Role-Specific Skill Suggestions:")
-        skills_categories = cached_generate_role_skills(role)
+    # Type of Work
+    st.markdown("### Type of Work")
+    work_type = st.radio(
+        "Select the work type:",
+        options=["Onsite", "Remote", "Hybrid"],
+        help="Specify whether the job is onsite, remote, or hybrid."
+    )
 
-        # Display categorized skills
-        all_skills = {}
-        st.markdown("### Suggested Skills:")
-        
-        for category, skills in skills_categories.items():
-            st.subheader(f"{category} Skills")
-            all_skills[category] = skills
+    # Job Contract Type
+    st.markdown("### Job Contract Type")
+    contract_type = st.radio(
+        "Contract Type:",
+        options=["Permanent", "Temporary", "Freelance", "Internship"],
+        help="Specify the type of contract for the job."
+    )
 
-        # Flatten skills into a single list for user selection
-        all_skill_list = [skill for skills in all_skills.values() for skill in skills]
+    # Weekly Hours
+    st.markdown("### Weekly Work Hours")
+    weekly_hours = st.slider(
+        "Select the number of weekly hours:",
+        min_value=10,
+        max_value=60,
+        value=40,
+        step=5,
+        help="Slide to adjust the average number of hours per week."
+    )
 
-        # Must-Have Skills Selection
-        st.markdown("### Select Must-Have Skills")
-        selected_must_have_skills = []
-        for skill in all_skill_list:
-            if st.checkbox(skill, key=f"must_have_{skill}", value=skill in st.session_state.must_have_skills):
-                selected_must_have_skills.append(skill)
-        st.session_state.must_have_skills = selected_must_have_skills
+    # Additional Perks or Notes
+    st.markdown("### Additional Notes or Perks")
+    additional_notes = st.text_area(
+        "Enter any additional information about the role:",
+        placeholder="e.g., Flexible working hours, health insurance, relocation support, etc."
+    )
 
-        # Nice-to-Have Skills Selection
-        st.markdown("### Select Nice-to-Have Skills")
-        selected_nice_to_have_skills = []
-        for skill in all_skill_list:
-            if st.checkbox(skill, key=f"nice_to_have_{skill}", value=skill in st.session_state.nice_to_have_skills):
-                selected_nice_to_have_skills.append(skill)
-        st.session_state.nice_to_have_skills = selected_nice_to_have_skills
-
+    # Validate and Proceed to the Next Step
     if st.button("Next"):
-        if not role or not st.session_state.must_have_skills:
-            st.error("Please provide the role and select must-have skills.")
+        if not role or not place_of_work:
+            st.error("Please provide the Role Title and Place of Work.")
             return
 
+        # Save data in session state
         st.session_state.role_info = {
             "role": role,
             "salary_min": salary_min,
             "salary_max": salary_max,
-            "must_have_skills": st.session_state.must_have_skills,
-            "nice_to_have_skills": st.session_state.nice_to_have_skills,
+            "place_of_work": place_of_work,
+            "work_type": work_type,
+            "contract_type": contract_type,
+            "weekly_hours": weekly_hours,
+            "additional_notes": additional_notes.strip()
         }
 
         change_page(3)  # Move to the next page
@@ -266,6 +262,21 @@ def job_ad_page():
     else:
         st.error("Incomplete information. Please fill out all sections.")
 
+def iv_prep_page():
+    st.title("Interview Preparation Sheet")
+    if all(key in st.session_state for key in ["company_info", "role_info", "benefits", "recruitment_process"]):
+        iv_prep = generate_interview_preparation_sheet(
+            company_info=str(st.session_state.company_info),
+            role_info=str(st.session_state.role_info),
+            benefits=str(st.session_state.benefits),
+            recruitment_process=str(st.session_state.recruitment_process),
+        )
+        st.write("Interview Preparation Sheet:")
+        st.write(iv_prep)
+        st.download_button("Download Interview Preparation Sheet", job_ad, file_name="Interview Preparation Sheet.txt")
+    else:
+        st.error("Incomplete information. Please fill out all sections.")
+
 # Function to update summary with comments
 def update_summary_with_comments(comment: str):
     """
@@ -287,6 +298,7 @@ pages = {
     4: recruitment_process_page,
     5: summary_page,
     6: job_ad_page,
+    7: iv_prep_page
 }
 
 # Render the current page
