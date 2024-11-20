@@ -196,9 +196,6 @@ def custom_css():
         unsafe_allow_html=True,
     )
 
-def change_page(page_number: int):
-    """Change the current page of the Streamlit app by updating the session state."""
-    if page_number in range(1, 6):
-        st.session_state.page = page_number
-    else:
-        st.error("Invalid page number. Please provide a valid page number between 1 and 5.")
+def change_page(new_page: int):
+    """Changes the current page."""
+    st.session_state.page = new_page
