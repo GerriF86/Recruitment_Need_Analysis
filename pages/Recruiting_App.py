@@ -91,6 +91,50 @@ def company_info_page():
             "company_size": company_size,
         }
         change_page(2)  # Move to the next page
+def role_skills_page():
+    st.title("Role-Specific Skills")
+    
+    # Check if role information is available
+    if "role_info" not in st.session_state or not st.session_state.role_info.get("role"):
+        st.error("Please complete the Role Information page first.")
+        return
+    
+    # Get the role from session state
+    role = st.session_state.role_info.get("role")
+    
+    # Call cached_generate_role_skills to generate skills
+    try:
+        skills_categories = cached_generate_role_skills(role)
+        st.markdown(f"### Suggested Skills for the Role: {role}")
+    except Exception as e:
+        st.error(f"Error generating role skills: {e}")
+        return
+
+    # Display skills by category with checkboxes
+    must_have_skills = st.session_state.get("must_have_skills", [])
+    nice_to_have_skills = st.session_state.get("nice_to_have_skills", [])
+
+    st.markdown("### Categorize the Skills")
+    for category, skills in skills_categories.items():
+        st.subheader(f"{category}")
+        for skill in skills:
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.checkbox(f"Must Have: {skill}", key=f"must_{skill}", value=skill in must_have_skills):
+                    if skill not in must_have_skills:
+                        must_have_skills.append(skill)
+            with col2:
+                if st.checkbox(f"Nice to Have: {skill}", key=f"nice_{skill}", value=skill in nice_to_have_skills):
+                    if skill not in nice_to_have_skills:
+                        nice_to_have_skills.append(skill)
+    
+    # Update session state
+    st.session_state.must_have_skills = must_have_skills
+    st.session_state.nice_to_have_skills = nice_to_have_skills
+
+    # Proceed to the next page
+    if st.button("Next"):
+        change_page(3)  # Assuming the next page is benefits_page
 
 def role_info_page():
     st.title("Role Information")
@@ -169,7 +213,7 @@ def role_info_page():
             "additional_notes": additional_notes.strip()
         }
 
-        change_page(3)  # Move to the next page
+        change_page(4)  # Move to the next page
 
 def benefits_page():
     st.title("Benefits")
@@ -195,7 +239,7 @@ def benefits_page():
             return
 
         st.session_state.benefits = selected_benefits + additional_benefits.split(",")
-        change_page(4)  # Move to the next page
+        change_page(5)  # Move to the next page
 
 def recruitment_process_page():
     st.title("Recruitment Process")
@@ -221,7 +265,7 @@ def recruitment_process_page():
             return
 
         st.session_state.recruitment_process = selected_recruitment_steps + additional_steps.split(",")
-        change_page(5)  # Move to the next page
+        change_page(6)  # Move to the next page
 
 def summary_page():
     st.title("Summary of Collected Information")
@@ -245,7 +289,7 @@ def summary_page():
             st.success("Comments added successfully!")
 
     if st.button("Next"):
-        change_page(6)  # Move to the next page
+        change_page(7)  # Move to the next page
 
 def job_ad_page():
     st.title("Generated Job Advertisement")
@@ -294,11 +338,12 @@ def update_summary_with_comments(comment: str):
 pages = {
     1: company_info_page,
     2: role_info_page,
-    3: benefits_page,
-    4: recruitment_process_page,
-    5: summary_page,
-    6: job_ad_page,
-    7: iv_prep_page
+    3: role_skills_page,  # New Skills Selection Page
+    4: benefits_page,
+    5: recruitment_process_page,
+    6: summary_page,
+    7: job_ad_page,
+    8: iv_prep_page
 }
 
 # Render the current page

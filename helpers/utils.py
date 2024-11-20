@@ -31,8 +31,75 @@ def query_groq_model(prompt, model_name="llama3-8b-8192"):
     return None
 
 # Query Functions
+@st.cache_data
+def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
+    """Generate and cache skills for a specific role."""
+    if not role:
+        return {"Error": ["No role specified."]}
 
-def generate_interview_preparation_sheet(data: Dict[str, Any]) -> str:
+    categories = {
+        "Programming Languages": [],
+        "Libraries": [],
+        "Soft Skills": [],
+        "Technical Skills": [],
+        "Management Skills": [],
+        "Analytical Skills": [],
+        "Tools/Technologies": []
+    }
+
+    prompt = (
+        f"You are an expert HR consultant. For the role '{role}', list as keywords with no further explanation the top 5 Programming Languages, "
+        f"top 15 Libraries, and top 10 Soft Skills, along with other skills categorized as "
+        f"Technical Skills, Management Skills, Analytical Skills, and Tools/Technologies."
+    )
+
+    skills_response = query_local_llm(prompt)
+    skills = [skill.strip() for skill in skills_response.split("\n") if skill.strip()]
+    
+    predefined_keywords = {
+        "Programming Languages": ["Python", "Java", "C++", "JavaScript", "SQL"],
+        "Libraries": ["TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy"],
+        "Soft Skills": ["communication", "teamwork", "adaptability", "problem-solving"],
+        "Technical Skills": ["programming", "coding", "cloud", "networking", "engineering"],
+        "Management Skills": ["leadership", "planning", "strategy", "risk management"],
+        "Analytical Skills": ["data", "analysis", "decision-making", "quantitative"],
+        "Tools/Technologies": ["Excel", "Tableau", "Power BI", "SQL", "Python"]
+    }
+
+    # Categorize skills into predefined sections
+    for skill in skills:
+        for category, keywords in predefined_keywords.items():
+            if any(keyword.lower() in skill.lower() for keyword in keywords):
+                if len(categories[category]) < 15:  # Allow up to 15 items
+                    categories[category].append(skill)
+                break
+
+    return categories
+
+def role_info_page(role: str):
+    """Render the Role Information page with sliders for skill intensity."""
+    skills_categories = cached_generate_role_skills(role)
+
+    if "Error" in skills_categories:
+        st.warning("No role specified or skills could not be generated.")
+        return
+
+    skill_levels = {}
+    for category, skill_list in skills_categories.items():
+        st.markdown(f"### {category}")
+        for skill in skill_list:
+            # Sliders are moved outside the cached function
+            skill_levels[skill] = st.slider(
+                f"{skill} (Nice to Have ↔ Must Have)",
+                min_value=0,
+                max_value=10,
+                value=5
+            )
+    
+    # Optionally cache the skill levels in `st.session_state`
+    st.session_state[f"{role}_skill_levels"] = skill_levels
+
+def generate_interview_preparation_sheet(data: Dict[str, any]) -> str:
     """
     Generate an interview preparation sheet based on the gathered information.
 
@@ -97,7 +164,7 @@ def generate_interview_preparation_sheet(data: Dict[str, Any]) -> str:
     return preparation_sheet
 
 def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx: int = 8192) -> str:
-    """Query a local LLM server to generate a response based on a prompt."""
+    """Query a local LLM server to generate a response as keywords with no further explanation based on a prompt."""
     url = "http://127.0.0.1:11434/api/generate"
     headers = {"Content-Type": "application/json"}
     payload = {"model": model, "prompt": prompt, "num_ctx": num_ctx}
@@ -144,7 +211,7 @@ def query_rag(prompt: str, api_key: str, retrieval_count: int = 5, confidence_th
 # Skill and Summary Generators
 @st.cache_data
 def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
-    """Generate and cache skills for a specific role with sliders for intensity adjustments."""
+    """Generate as keywords with no further explanation and cache skills for a specific role with sliders for intensity adjustments."""
     if not role:
         st.warning("Role is empty. Please provide a valid job role.")
         return {"Error": ["No role specified."]}
@@ -161,7 +228,7 @@ def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
 
     # Updated prompt to align with specific categories
     prompt = (
-        f"You are an expert HR consultant. For the role '{role}', list the top 5 Programming Languages, "
+        f"You are an expert HR consultant. For the role '{role}', list as keywords with no further explanation the top 5 Programming Languages, "
         f"top 15 Libraries, and top 10 Soft Skills, along with other skills categorized as "
         f"Technical Skills, Management Skills, Analytical Skills, and Tools/Technologies."
     )
@@ -310,7 +377,7 @@ def change_page(new_page: int):
 @st.cache_data
 def cached_generate_role_benefits(role: str):
     """
-    Generate and cache a list of role-specific benefits, described with less than 5 words.
+    Generate and cache a list of keywords with no further explanation role-specific benefits, described with less than 5 words.
     """
     if not role:
         st.warning("Role is empty. Please provide a valid job role.")
@@ -318,7 +385,7 @@ def cached_generate_role_benefits(role: str):
 
     # Construct the prompt
     prompt = (
-        f"You are an expert HR consultant. List up to 10 benefits that would attract candidates "
+        f"You are an expert HR consultant. List up to 10 benefits as keywords with no further explanation that would attract candidates "
         f"to the role '{role}'. Provide them as bullet points."
     )
 
@@ -352,7 +419,7 @@ def cached_generate_role_recruitment_steps(role: str):
 
     # Construct the prompt
     prompt = (
-        f"You are an expert HR consultant. List up to 10 ideal steps for the recruitment process for "
+        f"You are an expert HR consultant. List up to 10 ideal steps for the recruitment process as keywords with no further explanation for "
         f"the role '{role}'. Provide them as bullet points."
     )
 
