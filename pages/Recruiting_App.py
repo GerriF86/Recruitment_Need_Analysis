@@ -1,17 +1,19 @@
 import streamlit as st
 import toml
-import re
+import requests
 from pathlib import Path
 import sys
 from helpers.utils import (
     validate_job_title,
     cached_generate_role_skills,
     generate_job_advertisement,
-    #query_local_llm,
     cached_generate_role_benefits,
     cached_generate_role_recruitment_steps,
-    change_page
+    query_local_llm
 )
+
+# Dynamically add the project root to the Python path to fix import issues
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 # Load configurations from config.toml
 try:
@@ -20,9 +22,6 @@ except Exception as e:
     st.error(f"Error loading configuration file: {e}")
     st.stop()
 
-# Dynamically add the project root to the Python path to fix import issues
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-
 # Set page configuration - use settings from config.toml
 st.set_page_config(
     page_title=config["app"]["page_title"],
@@ -30,11 +29,62 @@ st.set_page_config(
     layout=config["app"].get("layout", "wide")
 )
 
+# Load the Groq API Key
+groq_key = config["api"]["groq_key"]
+
+# Function to query the Groq API
+def query_groq_model(prompt, model_name="llama3-8b"):
+    url = "https://console.groq.com/playground"
+    headers = {
+        "Authorization": f"Bearer {groq_key}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": model_name,
+        "messages": [{"role": "user", "content": prompt}]
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    if response.status_code == 200:
+        return response.json()["choices"][0]["message"]["content"]
+    else:
+        st.error(f"Error connecting to Groq API: {response.status_code}, {response.text}")
+        return None
+
 # Initialize Session State
-session_keys = ["page", "company_info", "role_info", "benefits", "recruitment_process", "must_have_skills", "nice_to_have_skills", "selected_benefits", "selected_recruitment_steps"]
+session_keys = ["page", "company_info", "role_info", "benefits", "recruitment_process", "must_have_skills", "nice_to_have_skills", "selected_benefits", "selected_recruitment_steps", "model_choice"]
 for key in session_keys:
     if key not in st.session_state:
         st.session_state[key] = [] if key in ["must_have_skills", "nice_to_have_skills", "selected_benefits", "selected_recruitment_steps"] else None
+
+# Model Selection by User
+model_choice = st.selectbox(
+    "Select Model Type:",
+    options=["Local Ollama (High Quality, Slower)", "Groq llama3-8b (Fast, Slightly Lower Quality)"],
+    key="model_choice"
+)
+
+# Function to use the appropriate model based on user selection
+def user_model_query(prompt):
+    if st.session_state.model_choice == "Local Ollama (High Quality, Slower)":
+        # Use local model
+        return query_local_llm(prompt)
+    elif st.session_state.model_choice == "Groq llama3-8b (Fast, Slightly Lower Quality)":
+        # Use Groq model via API
+        return query_groq_model(prompt, model_name="llama3-8b")
+    else:
+        return "Invalid model choice"
+
+# UI for User Prompt and Generating Response
+st.title("Recruitment Need Analysis - Model Interaction")
+
+prompt = st.text_area("Enter your prompt here:")
+
+if st.button("Generate Response"):
+    if prompt:
+        response = user_model_query(prompt)
+        st.write(response)
+    else:
+        st.warning("Please enter a prompt before generating a response.")
 
 # Page functions
 def change_page(new_page: int):
@@ -72,6 +122,8 @@ def company_info_page():
 def role_info_page():
     st.title("Role Information")
     role = st.text_input("Role Title:")
+    salary_min = st.number_input("Minimum Salary Expectation:", min_value=0, step=1000)
+    salary_max = st.number_input("Maximum Salary Expectation:", min_value=0, step=1000)
 
     if role and not validate_job_title(role):
         st.error("Invalid role title. Please enter a valid one.")
@@ -94,25 +146,19 @@ def role_info_page():
 
         # Must-Have Skills Selection
         st.markdown("### Select Must-Have Skills")
-        must_have_selection = st.multiselect(
-            "Select Must-Have Skills:",
-            options=all_skill_list,
-            default=st.session_state.must_have_skills,
-            key="must_have_select"
-        )
+        selected_must_have_skills = []
+        for skill in all_skill_list:
+            if st.checkbox(skill, key=f"must_have_{skill}", value=skill in st.session_state.must_have_skills):
+                selected_must_have_skills.append(skill)
+        st.session_state.must_have_skills = selected_must_have_skills
 
         # Nice-to-Have Skills Selection
         st.markdown("### Select Nice-to-Have Skills")
-        nice_to_have_selection = st.multiselect(
-            "Select Nice-to-Have Skills:",
-            options=all_skill_list,
-            default=st.session_state.nice_to_have_skills,
-            key="nice_to_have_select"
-        )
-
-        # Update session state
-        st.session_state.must_have_skills = must_have_selection
-        st.session_state.nice_to_have_skills = nice_to_have_selection
+        selected_nice_to_have_skills = []
+        for skill in all_skill_list:
+            if st.checkbox(skill, key=f"nice_to_have_{skill}", value=skill in st.session_state.nice_to_have_skills):
+                selected_nice_to_have_skills.append(skill)
+        st.session_state.nice_to_have_skills = selected_nice_to_have_skills
 
     if st.button("Next"):
         if not role or not st.session_state.must_have_skills:
@@ -121,6 +167,8 @@ def role_info_page():
 
         st.session_state.role_info = {
             "role": role,
+            "salary_min": salary_min,
+            "salary_max": salary_max,
             "must_have_skills": st.session_state.must_have_skills,
             "nice_to_have_skills": st.session_state.nice_to_have_skills,
         }
@@ -137,18 +185,10 @@ def benefits_page():
 
         # Display categorized benefits
         st.markdown("### Suggested Benefits:")
+        selected_benefits = []
         for benefit in benefits_suggestions:
-            st.write(f"- {benefit}")
-
-        # Benefits Selection
-        selected_benefits = st.multiselect(
-            "Select Benefits for this role:",
-            options=benefits_suggestions,
-            default=st.session_state.selected_benefits,
-            key="benefits_select"
-        )
-
-        # Update session state
+            if st.checkbox(benefit, key=f"benefit_{benefit}", value=benefit in st.session_state.selected_benefits):
+                selected_benefits.append(benefit)
         st.session_state.selected_benefits = selected_benefits
 
     additional_benefits = st.text_area("Enter any additional benefits you wish to add:")
@@ -171,28 +211,20 @@ def recruitment_process_page():
 
         # Display categorized recruitment steps
         st.markdown("### Suggested Recruitment Steps:")
+        selected_recruitment_steps = []
         for step in recruitment_steps_suggestions:
-            st.write(f"- {step}")
-
-        # Recruitment Process Selection
-        selected_steps = st.multiselect(
-            "Select Recruitment Steps for this role:",
-            options=recruitment_steps_suggestions,
-            default=st.session_state.selected_recruitment_steps,
-            key="recruitment_steps_select"
-        )
-
-        # Update session state
-        st.session_state.selected_recruitment_steps = selected_steps
+            if st.checkbox(step, key=f"recruitment_step_{step}", value=step in st.session_state.selected_recruitment_steps):
+                selected_recruitment_steps.append(step)
+        st.session_state.selected_recruitment_steps = selected_recruitment_steps
 
     additional_steps = st.text_area("Enter any additional recruitment steps you wish to add:")
 
     if st.button("Next"):
-        if not selected_steps and not additional_steps:
+        if not selected_recruitment_steps and not additional_steps:
             st.error("Please select or enter recruitment steps.")
             return
 
-        st.session_state.recruitment_process = selected_steps + additional_steps.split(",")
+        st.session_state.recruitment_process = selected_recruitment_steps + additional_steps.split(",")
         change_page(5)  # Move to the next page
 
 def summary_page():

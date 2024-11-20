@@ -5,7 +5,7 @@ layout = "wide"
 theme = "auto"  # Options could be 'light', 'dark', 'auto'
 
 [api]
-groq_key = "YOUR_GROQ_KEY_HERE"
+groq_key = "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"
 
 [pages]
 

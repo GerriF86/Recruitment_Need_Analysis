@@ -6,6 +6,30 @@ import streamlit as st
 from typing import List, Dict, Optional
 from pathlib import Path
 
+# Function to query the Groq API with enhanced error handling and debugging
+def query_groq_model(prompt, model_name="llama3-8b-8192"):
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {groq_key}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": model_name,
+        "messages": [{"role": "user", "content": prompt}]
+    }
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        response_data = response.json()
+        return response_data["choices"][0]["message"]["content"]
+    except requests.exceptions.HTTPError as http_err:
+        st.error(f"HTTP error occurred: {http_err}")
+    except requests.exceptions.RequestException as req_err:
+        st.error(f"Request error occurred: {req_err}")
+    except ValueError as json_err:
+        st.error(f"JSON decode error: {json_err}")
+    return None
+
 # Query Functions
 def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx: int = 8192) -> str:
     """Query a local LLM server to generate a response based on a prompt."""
@@ -31,6 +55,16 @@ def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx
     except json.JSONDecodeError as e:
         st.error(f"Error decoding LLM response: {e}")
         return ""
+def user_model_query(prompt):
+    if st.session_state.model_choice == "Local Ollama (High Quality, Slower)":
+        # Use local model
+        response = query_local_llm(prompt)
+    elif st.session_state.model_choice == "Groq llama3-8b (Fast, Slightly Lower Quality)":
+        # Use Groq's llama3-8b model
+        response = query_groq_model(prompt, model_name="llama3-8b")
+    else:
+        response = "Invalid model choice"
+    return response
 
 def query_remote_api(prompt: str, api_key: str, timeout: int = 15) -> str:
     """Query a remote API to generate a response based on a prompt."""
