@@ -1,20 +1,27 @@
 import streamlit as st
+import toml
 from pathlib import Path
 import sys
 from helpers.utils import (
     validate_job_title,
-    generate_role_skills,
-    generate_section_summary,
+    cached_generate_role_skills,
     generate_job_advertisement,
     change_page,
-    load_html_template,
+    query_local_llm
 )
+
+# Load configurations from config.toml
+config = toml.load("config.toml")
 
 # Dynamically add the project root to the Python path to fix import issues
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-# Set page configuration - This must be the first Streamlit command in the script
-st.set_page_config(page_title="Recruitment Need Analysis", page_icon="📄", layout="wide")
+# Set page configuration - use settings from config.toml
+st.set_page_config(
+    page_title=config["app"]["page_title"],
+    page_icon=config["app"]["page_icon"],
+    layout=config["app"].get("layout", "wide")
+)
 
 # Initialize Session State
 session_keys = ["page", "company_info", "role_info", "benefits", "recruitment_process"]
@@ -27,7 +34,16 @@ def company_info_page():
     company_name = st.text_input("Company Name:")
     location = st.text_input("Location:")
     industry = st.text_input("Industry:")
-    company_size = st.number_input("Number of Employees:", min_value=1, step=1)
+
+    # Updated slider for Number of Employees
+    company_size = st.slider(
+        "Number of Employees:",
+        min_value=1,
+        max_value=1000,
+        value=200,  # Default value
+        step=10,  # Step size
+        help="Slide to select the approximate number of employees."
+    )
 
     if st.button("Next"):
         if not company_name or not location or not industry:
@@ -41,8 +57,7 @@ def company_info_page():
             "company_size": company_size,
         }
 
-        # Generate and validate section summary
-        summary = generate_section_summary("Company Information", str(st.session_state.company_info))
+        summary = f"Company Information Summary:\nCompany Name: {company_name}\nLocation: {location}\nIndustry: {industry}\nCompany Size: {company_size}"
         st.session_state.company_info_summary = summary
         st.write("Summary:", summary)
         change_page(1)
@@ -57,8 +72,14 @@ def role_info_page():
 
     if role:
         st.write("Role-Specific Skill Suggestions:")
-        skills = generate_role_skills(role)
-        st.write(", ".join(skills))
+        # Use cached_generate_role_skills
+        skills_categories = cached_generate_role_skills(role)
+        skills = [skill for category in skills_categories.values() for skill in category]
+        
+        if skills:
+            st.markdown("### Suggested Skills:")
+            for skill in skills:
+                st.write(f"- {skill}")
 
     must_have_skills = st.text_area("Must-Have Skills:")
     nice_to_have_skills = st.text_area("Nice-to-Have Skills:")
@@ -74,8 +95,12 @@ def role_info_page():
             "nice_to_have_skills": nice_to_have_skills.split(",") if nice_to_have_skills else [],
         }
 
-        # Generate and validate section summary
-        summary = generate_section_summary("Role Information", str(st.session_state.role_info))
+        summary = (
+            f"Role Information Summary:\n"
+            f"Role Title: {role}\n"
+            f"Must-Have Skills: {', '.join(must_have_skills.split(','))}\n"
+            f"Nice-to-Have Skills: {', '.join(nice_to_have_skills.split(','))}"
+        )
         st.session_state.role_info_summary = summary
         st.write("Summary:", summary)
         change_page(1)
@@ -90,9 +115,7 @@ def benefits_page():
             return
 
         st.session_state.benefits = benefits
-
-        # Generate and validate section summary
-        summary = generate_section_summary("Benefits", benefits)
+        summary = f"Benefits Summary:\n{benefits}"
         st.session_state.benefits_summary = summary
         st.write("Summary:", summary)
         change_page(1)
@@ -107,9 +130,7 @@ def recruitment_process_page():
             return
 
         st.session_state.recruitment_process = recruitment_process
-
-        # Generate and validate section summary
-        summary = generate_section_summary("Recruitment Process", recruitment_process)
+        summary = f"Recruitment Process Summary:\n{recruitment_process}"
         st.session_state.recruitment_process_summary = summary
         st.write("Summary:", summary)
         change_page(1)

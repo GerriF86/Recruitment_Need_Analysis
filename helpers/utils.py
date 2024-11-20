@@ -45,22 +45,75 @@ def query_rag(prompt: str, api_key: str, retrieval_count: int = 5, confidence_th
     return ""
 
 # Skill and Summary Generators
+
 @st.cache_data
-def cached_generate_role_skills(role: str) -> List[str]:
-    """Generate and cache skills for a specific role."""
+def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
+    """
+    Generate and cache skills for a specific role, categorizing them into predefined categories.
+    """
     if not role:
         st.warning("Role is empty. Please provide a valid job role.")
-        return []
+        return {"Error": ["No role specified."]}
 
-    prompt = f"List 10 essential skills required for the role: {role}."
-    skills_response = query_local_llm(prompt)
+    # Define role-specific categories
+    categories = {
+        "Technical Skills": [],
+        "Soft Skills": [],
+        "Management Skills": [],
+        "Analytical Skills": [],
+        "Tools/Technologies": []
+    }
 
-    if not skills_response:
-        st.error("Failed to generate skills. Ensure the LLM server is running.")
-        return []
+    # Construct the prompt
+    prompt = (
+        f"You are an expert HR consultant. List up to 25 skills categorized into "
+        f"Technical Skills, Soft Skills, Management Skills, Analytical Skills, "
+        f"and Tools/Technologies for the role '{role}'."
+    )
 
-    skills = [skill.strip() for skill in skills_response.split("\n") if skill.strip()]
-    return skills or ["No skills found. Please try a different role."]
+    # Query the LLM
+    try:
+        skills_response = query_local_llm(prompt)
+        if not isinstance(skills_response, str) or len(skills_response.strip()) == 0:
+            raise ValueError("Invalid or empty LLM response.")
+
+        # Split response into lines and clean them
+        skills = [skill.strip() for skill in skills_response.split("\n") if skill.strip()]
+        if not skills:
+            raise ValueError("Empty skill list generated.")
+
+        # Map skills into categories
+        predefined_keywords = {
+            "Technical Skills": ["programming", "coding", "cloud", "networking", "engineering"],
+            "Soft Skills": ["communication", "teamwork", "adaptability", "problem-solving"],
+            "Management Skills": ["leadership", "planning", "strategy", "risk management"],
+            "Analytical Skills": ["data", "analysis", "decision-making", "quantitative"],
+            "Tools/Technologies": ["Excel", "Tableau", "Power BI", "SQL", "Python"]
+        }
+
+        for skill in skills:
+            added = False
+            for category, keywords in predefined_keywords.items():
+                if any(keyword.lower() in skill.lower() for keyword in keywords):
+                    if len(categories[category]) < 5:
+                        categories[category].append(skill)
+                        added = True
+                        break
+
+            # Add to Miscellaneous if no specific category matches
+            if not added and len(categories["Tools/Technologies"]) < 5:
+                categories["Tools/Technologies"].append(skill)
+
+        # Limit total skills across all categories to 25
+        total_skills = sum(len(skills) for skills in categories.values())
+        if total_skills > 25:
+            categories = {k: v[:5] for k, v in categories.items()}
+
+        return categories
+
+    except Exception as e:
+        st.error(f"Error generating skills: {e}")
+        return {"Error": ["No skills could be generated due to a processing error."]}
 
 def categorize_skills(skills: List[str]) -> Dict[str, List[str]]:
     """Categorize skills into predefined categories."""
@@ -126,6 +179,7 @@ def generate_job_advertisement(company_info: str, role_info: str, benefits: str,
         return "Job advertisement generation failed. Please try again."
 
     return job_ad
+
 def custom_css():
     """Apply custom CSS styling to the Streamlit app."""
     st.markdown(
@@ -141,3 +195,10 @@ def custom_css():
         """,
         unsafe_allow_html=True,
     )
+
+def change_page(page_number: int):
+    """Change the current page of the Streamlit app by updating the session state."""
+    if page_number in range(1, 6):
+        st.session_state.page = page_number
+    else:
+        st.error("Invalid page number. Please provide a valid page number between 1 and 5.")
