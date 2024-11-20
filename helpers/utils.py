@@ -34,28 +34,22 @@ def query_local_llm(prompt: str, model: str = "koesn/dolphin-llama3-8b", num_ctx
 
 def query_remote_api(prompt: str, api_key: str, timeout: int = 15) -> str:
     """Query a remote API to generate a response based on a prompt."""
-    # Placeholder for future implementation
     st.info("Remote API integration not yet implemented.")
     return ""
 
 def query_rag(prompt: str, api_key: str, retrieval_count: int = 5, confidence_threshold: float = 0.5) -> str:
     """Query a Retrieval-Augmented Generation (RAG) API."""
-    # Placeholder for future implementation
     st.info("RAG integration not yet implemented.")
     return ""
 
 # Skill and Summary Generators
-
 @st.cache_data
 def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
-    """
-    Generate and cache skills for a specific role, categorizing them into predefined categories.
-    """
+    """Generate and cache skills for a specific role, categorizing them into predefined categories."""
     if not role:
         st.warning("Role is empty. Please provide a valid job role.")
         return {"Error": ["No role specified."]}
 
-    # Define role-specific categories
     categories = {
         "Technical Skills": [],
         "Soft Skills": [],
@@ -64,25 +58,21 @@ def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
         "Tools/Technologies": []
     }
 
-    # Construct the prompt
     prompt = (
         f"You are an expert HR consultant. List up to 25 skills categorized into "
         f"Technical Skills, Soft Skills, Management Skills, Analytical Skills, "
         f"and Tools/Technologies for the role '{role}'."
     )
 
-    # Query the LLM
     try:
         skills_response = query_local_llm(prompt)
         if not isinstance(skills_response, str) or len(skills_response.strip()) == 0:
             raise ValueError("Invalid or empty LLM response.")
 
-        # Split response into lines and clean them
         skills = [skill.strip() for skill in skills_response.split("\n") if skill.strip()]
         if not skills:
             raise ValueError("Empty skill list generated.")
 
-        # Map skills into categories
         predefined_keywords = {
             "Technical Skills": ["programming", "coding", "cloud", "networking", "engineering"],
             "Soft Skills": ["communication", "teamwork", "adaptability", "problem-solving"],
@@ -100,11 +90,9 @@ def cached_generate_role_skills(role: str) -> Dict[str, List[str]]:
                         added = True
                         break
 
-            # Add to Miscellaneous if no specific category matches
             if not added and len(categories["Tools/Technologies"]) < 5:
                 categories["Tools/Technologies"].append(skill)
 
-        # Limit total skills across all categories to 25
         total_skills = sum(len(skills) for skills in categories.values())
         if total_skills > 25:
             categories = {k: v[:5] for k, v in categories.items()}
@@ -199,3 +187,71 @@ def custom_css():
 def change_page(new_page: int):
     """Changes the current page."""
     st.session_state.page = new_page
+
+# Generate and Cache Role-Specific Benefits
+@st.cache_data
+def cached_generate_role_benefits(role: str):
+    """
+    Generate and cache a list of role-specific benefits.
+    """
+    if not role:
+        st.warning("Role is empty. Please provide a valid job role.")
+        return ["No role specified."]
+
+    # Construct the prompt
+    prompt = (
+        f"You are an expert HR consultant. List up to 10 benefits that would attract candidates "
+        f"to the role '{role}'. Provide them as bullet points."
+    )
+
+    # Query the LLM
+    try:
+        benefits_response = query_local_llm(prompt)
+        if not isinstance(benefits_response, str) or len(benefits_response.strip()) == 0:
+            raise ValueError("Invalid or empty LLM response.")
+
+        # Split response into lines and clean them
+        benefits = [benefit.strip() for benefit in benefits_response.split("\n") if benefit.strip()]
+        if not benefits:
+            raise ValueError("Empty benefit list generated.")
+
+        # Limit benefits to 10 items
+        return benefits[:10]
+
+    except Exception as e:
+        st.error(f"Error generating benefits: {e}")
+        return ["No benefits could be generated due to a processing error."]
+
+# Generate and Cache Role-Specific Recruitment Steps
+@st.cache_data
+def cached_generate_role_recruitment_steps(role: str):
+    """
+    Generate and cache a list of role-specific recruitment steps.
+    """
+    if not role:
+        st.warning("Role is empty. Please provide a valid job role.")
+        return ["No role specified."]
+
+    # Construct the prompt
+    prompt = (
+        f"You are an expert HR consultant. List up to 10 ideal steps for the recruitment process for "
+        f"the role '{role}'. Provide them as bullet points."
+    )
+
+    # Query the LLM
+    try:
+        recruitment_steps_response = query_local_llm(prompt)
+        if not isinstance(recruitment_steps_response, str) or len(recruitment_steps_response.strip()) == 0:
+            raise ValueError("Invalid or empty LLM response.")
+
+        # Split response into lines and clean them
+        recruitment_steps = [step.strip() for step in recruitment_steps_response.split("\n") if step.strip()]
+        if not recruitment_steps:
+            raise ValueError("Empty recruitment step list generated.")
+
+        # Limit steps to 10 items
+        return recruitment_steps[:10]
+
+    except Exception as e:
+        st.error(f"Error generating recruitment steps: {e}")
+        return ["No recruitment steps could be generated due to a processing error."]

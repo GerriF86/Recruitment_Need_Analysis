@@ -2,7 +2,7 @@
 page_title = "Recruitment Need Analysis"
 page_icon = "🏠"
 layout = "wide"
-theme = "dark"  # Options could be 'light', 'dark', 'auto'
+theme = "auto"  # Options could be 'light', 'dark', 'auto'
 
 [api]
 groq_key = "YOUR_GROQ_KEY_HERE"
@@ -61,12 +61,20 @@ It uses insights from the company information, role requirements, and more to en
 """
 
 [security]
-use_https = true
-data_protection_level = "high"
+use_https = false
+data_protection_level = "low"
 encryption_method = "AES256"  # Choose from 'AES128', 'AES256', etc.
 user_authentication = "OAuth2"  # Authentication method used for the app
 
 [features]
 enable_dynamic_skill_suggestions = true
 use_sentiment_analysis = true
-enable_realtime_collaboration = false  # Allow multiple recruiters to work on the same page in real-time
+enable_realtime_collaboration = true  # Allow multiple recruiters to work on the same page in real-time
+
+# About Us Page Configurations
+about_us_title = "About Us"
+about_us_subtitle = "Meet the Visionaries Behind the Innovation"
+about_us_content = """
+At Cognitive Staffing, we merge years of expertise with cutting-edge technology to redefine recruitment.
+Our founders, Olivia Esau and Gerrit Fabisch, are industry leaders with unique perspectives and a shared passion for transforming the hiring process.
+"""

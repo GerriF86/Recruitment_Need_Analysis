@@ -3,26 +3,17 @@ import streamlit as st
 def magic_behind_the_scenes_page():
     st.title("The Magic Behind the Scenes")
     st.markdown("""
-    ### The Magic Behind the Scenes
-What makes our app so powerful is the combination of state-of-the-art technology and an intelligent design that understands your recruitment needs.
+    ### Revolutionizing Recruitment with Cutting-Edge Technology
 
-At its core, our app leverages Llama, a large language model, trained on millions of job-related data points and texts. This vast training data allows the model to grasp the nuances of job descriptions, organizational needs, and industry-specific terminology. Imagine having a recruitment expert who has read through millions of job postings and company reports—this is the level of understanding Llama brings to the table.
+Our app combines state-of-the-art AI, adaptive questioning, and sleek design to streamline the hiring process like never before. By harnessing the power of innovative tools, we ensure that every step, from needs assessment to candidate selection, is efficient, precise, and tailored to your unique requirements.
 
-Key Technical Highlights:
-    Harnessing the power of local large language models, intelligent state machines, and graph databases to revolutionize recruitment.
-                Millions of Training Data Points:
-The Llama model powering our app has been trained on datasets that include:
-
-2 million job descriptions
-1.5 million recruitment reviews
-Thousands of structured organizational charts
-This ensures it understands both the big picture and the small details critical for recruitment success.
-
-                Dynamic Question Flow:
-Using a smart state machine model, our app adjusts its questions based on your responses, ensuring no time is wasted on irrelevant details. Each step of the process adapts to the specific needs of your role and organization.
-
-Retrieval-Augmented Generation (RAG):
-Our app retrieves the most relevant information from its vast database to ensure accurate and context-specific responses. This makes the system highly reliable and tailored to your needs.
+Key Features:
+Llama Model: Trained on 2 million job descriptions and 1.5 million recruitment reviews, it grasps job-specific nuances and organizational needs.
+Dynamic Question Flow: Adapts in real-time to your inputs, ensuring role-specific, time-saving questioning.
+Retrieval-Augmented Generation (RAG): Delivers context-rich and highly accurate responses by retrieving relevant data.
+Neo4j Graph Database: Dynamically handles complex organizational structures for tailored insights.
+Streamlined UI/UX: Modern, intuitive interface designed with feedback from 500+ HR experts.
+Our mission is to simplify recruitment while maintaining depth and accuracy. With technology built to adapt to your needs, we aim to empower businesses to make smarter, faster, and more impactful hiring decisions.
                    
     """)
 
