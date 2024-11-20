@@ -1,8 +1,14 @@
 import streamlit as st
-from rec_need_app import impressum_page
+
+def impressum_page():
+    st.title("Impressum")
+    st.markdown("""
+    ### Legal Information
+    All rights reserved. Unauthorized use is prohibited.
+    """)
 
 # Set page configuration
-st.set_page_config(page_title="Impressum - Recruitment Need Analysis", page_icon="📜", layout="wide")
+st.set_page_config(page_title="Impressum", page_icon="📜", layout="wide")
 
-# Render Impressum page
+# Render the Impressum page
 impressum_page()

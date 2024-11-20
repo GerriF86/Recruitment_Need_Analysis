@@ -1,8 +1,14 @@
 import streamlit as st
-from rec_need_app import about_us_page
+
+def about_us_page():
+    st.title("About Us")
+    st.markdown("""
+    ### Revolutionizing Recruitment Through AI
+    Our app leverages state-of-the-art AI technologies to enhance recruitment workflows, making hiring smarter, faster, and more effective.
+    """)
 
 # Set page configuration
-st.set_page_config(page_title="About Us - Recruitment Need Analysis", page_icon="ℹ️", layout="wide")
+st.set_page_config(page_title="About Us", page_icon="ℹ️", layout="wide")
 
 # Render the About Us page
 about_us_page()
