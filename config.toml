@@ -4,9 +4,6 @@ page_icon = "🏠"
 layout = "wide"
 theme = "auto"  # Options: 'light', 'dark', 'auto'
 
-[api]
-groq_key = "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"
-
 [pages]
 # Home Page Configurations
 home_page_title = "Welcome to the Future of Recruitment"
